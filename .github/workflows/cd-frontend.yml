@@ -1,0 +1,84 @@
+name: CD Frontend
+
+on:
+  push:
+    branches:
+      - deploy-frontend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/deploy-frontend:${{ github.sha }} .
+
+      - name: Login Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/deploy-frontend:${{ github.sha }}
+          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/deploy-frontend:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/deploy-frontend:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/deploy-frontend:latest
+
+      - name: Setup SSH
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.EC2_SSH_KEY }}
+          known_hosts: unnecessary
+
+      - name: Add EC2 to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p 22 -H ${{ secrets.EC2_PUBLIC_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy frontend on EC2
+        run: |
+          ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=10 ec2-user@${{ secrets.EC2_PUBLIC_IP }} << EOF
+            set -euo pipefail
+
+            echo "Pulling image from Docker Hub"
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/deploy-frontend:${{ github.sha }}
+
+            echo "Stopping old container if exists..."
+            docker stop frontend || echo "No container running"
+            docker rm frontend || echo "No container to remove"
+
+            echo "Running new container..."
+            docker run -d --name frontend --network bdd_nginx_app-network \
+              ${{ secrets.DOCKERHUB_USERNAME }}/deploy-frontend:${{ github.sha }}
+
+            echo "Verifying container..."
+            docker ps
+            echo "Last logs:"
+            docker logs frontend | tail -20
+
+            echo "Deployment completed successfully"
+          EOF

@@ -1,0 +1,20 @@
+{
+  "extends": ["react-app", "react-app/jest"],
+  "env": {
+    "jest": true
+  },
+  "rules": {
+    "testing-library/no-node-access": "error",
+    "testing-library/no-wait-for-multiple-assertions": "error",
+    "testing-library/no-wait-for-side-effects": "error",
+    "testing-library/no-unnecessary-act": "error"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.*", "**/*.spec.*"],
+      "rules": {
+        "import/first": "error"
+      }
+    }
+  ]
+}

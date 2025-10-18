@@ -1,0 +1,23 @@
+engines:
+  - name: checkstyle
+    enabled: true
+  - name: eslint
+    enabled: true
+  - name: sonar-java
+    enabled: true
+  - name: jest
+    enabled: true
+  - name: trivy
+    enabled: false
+  - name: lizard
+    enabled: false
+
+
+exclude_paths:
+  - "node_modules/**"
+  - "target/**"
+  - "build/**"
+  - "coverage/**" 
+  - "**/*.test.*"
+  - "**/*.spec.*"
+  - "coverage/lcov-report/**"
