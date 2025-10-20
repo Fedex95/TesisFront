@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import Menu from './Producto';
+import Menu from '../components/Producto';
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;

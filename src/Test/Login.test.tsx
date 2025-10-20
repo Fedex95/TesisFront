@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Login from './Login';
+import Login from '../components/Login';
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;

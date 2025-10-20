@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import DeleteProducto from './Deleteproduct';
+import DeleteProducto from '../components/Deleteproduct';
 
 global.fetch = jest.fn();
 

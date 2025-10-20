@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Navbar from './Navbar';
+import Navbar from '../components/Navbar';
 
 const mockToggle = jest.fn();
 const mockUserMenu = { current: { toggle: mockToggle } };

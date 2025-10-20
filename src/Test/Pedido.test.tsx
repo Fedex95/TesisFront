@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import Pedido from './Pedido';
+import Pedido from '../components/Pedido';
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;

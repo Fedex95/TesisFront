@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import AddProduct from './Addproduct';
+import AddProduct from '../components/Addproduct';
 
 global.fetch = jest.fn();
 

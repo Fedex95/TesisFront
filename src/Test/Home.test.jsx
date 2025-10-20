@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import Home from './Home';
+import Home from '../components/Home';
 
 global.fetch = jest.fn();
 

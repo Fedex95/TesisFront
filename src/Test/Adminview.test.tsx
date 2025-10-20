@@ -1,10 +1,10 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import AdminMenu from './Adminview';
+import AdminMenu from '../components/Adminview';
 
-jest.mock('./Addproduct', () => () => <div>Add Product Component</div>);
-jest.mock('./Pedido', () => () => <div>Pedido Component</div>);
-jest.mock('./Deleteproduct', () => () => <div>Delete Product Component</div>);
-jest.mock('./Updateproduct', () => () => <div>Update Product Component</div>);
+jest.mock('../components/Addproduct', () => () => <div>Add Product Component</div>);
+jest.mock('../components/Pedido', () => () => <div>Pedido Component</div>);
+jest.mock('../components/Deleteproduct', () => () => <div>Delete Product Component</div>);
+jest.mock('../components/Updateproduct', () => () => <div>Update Product Component</div>);
 
 beforeAll(() => {
   // Mock createStylesheet to avoid CSS parsing errors

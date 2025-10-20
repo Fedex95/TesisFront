@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Register from './Register';
+import Register from '../components/Register';
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;

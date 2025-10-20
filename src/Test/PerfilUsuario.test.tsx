@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import Profile from './PerfilUsuario';
+import Profile from '../components/PerfilUsuario';
 
 beforeAll(() => {
   // Mock createStylesheet to avoid CSS parsing errors

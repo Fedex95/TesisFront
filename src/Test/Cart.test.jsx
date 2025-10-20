@@ -1,5 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
-import Cart from './Cart';
+import Cart from '../components/Cart';
 import { BrowserRouter } from 'react-router-dom';
 
 global.fetch = jest.fn();

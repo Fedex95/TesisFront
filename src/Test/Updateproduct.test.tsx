@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import UpdateProducto from './Updateproduct';
+import UpdateProducto from '../components/Updateproduct';
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
