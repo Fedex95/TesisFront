@@ -1,4 +1,3 @@
-const BASE = process.env.REACT_APP_URL_BACKEND;
 
 export async function apiFetch(path, options = {}) {
   const token = sessionStorage.getItem('auth_token'); 
@@ -11,10 +10,10 @@ export async function apiFetch(path, options = {}) {
     ...(options.headers || {})
   };
 
-  console.log('[apiFetch] URL:', `${BASE}${path}`);
+  console.log('[apiFetch] URL:', `${path}`);
   console.log('[apiFetch] Request headers:', headers);
 
-  const resp = await fetch(`${BASE}${path}`, {
+  const resp = await fetch(`${path}`, {
     ...options,
     headers
   });
