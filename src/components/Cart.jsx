@@ -8,7 +8,6 @@ import '../styles/Cart.css';
 
 function Cart({ userData }) {
     const [cartItems, setCartItems] = useState([]);
-    const [cartId, setCartId] = useState(null); 
     const toast = useRef(null);
     const navigate = useNavigate();
 
@@ -19,10 +18,8 @@ function Cart({ userData }) {
 
             if (cartData && cartData.items) {
                 setCartItems(cartData.items);
-                setCartId(cartData.id);
             } else {
                 setCartItems([]);
-                setCartId(null);
             }
 
         } catch (error) {

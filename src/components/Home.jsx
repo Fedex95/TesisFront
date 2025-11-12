@@ -15,7 +15,6 @@ function Home({ userData }) {
     const [quantities, setQuantities] = useState({});
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [dialogVisible, setDialogVisible] = useState(false);
-    const [productos, setProductos] = useState([]);  
 
     const categorias = [
         { label: 'Mouse', value: 'Mouse' },
@@ -32,18 +31,6 @@ function Home({ userData }) {
         { label: 'Monitores', value: 'Monitores' }
     ];
 
-    useEffect(() => {
-        (async () => {
-            try {
-                const productos = await apiFetch('/api/producto/find/all');
-                setProductos(productos);
-            } catch (e) {
-                console.error('Error:', e);
-            }
-        })();
-    }, [setProductos]);
-
-    
     useEffect(() => {
         const fetchProductos = async () => {
             try {
@@ -113,6 +100,7 @@ function Home({ userData }) {
             });
 
         } catch (error) {
+            console.error('Error:', error);
             toast.current.show({
                 severity: 'error',
                 summary: 'Error',
