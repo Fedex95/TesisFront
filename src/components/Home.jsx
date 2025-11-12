@@ -43,6 +43,7 @@ function Home({ userData }) {
         })();
     }, [setProductos]);
 
+    
     useEffect(() => {
         const fetchProductos = async () => {
             try {
