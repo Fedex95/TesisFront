@@ -8,7 +8,7 @@ import '../styles/Cart.css';
 
 function Cart({ userData }) {
     const [cartItems, setCartItems] = useState([]);
-    const [cartId, setCartId] = useState(null); 
+    const [setCartId] = useState(null); 
     const toast = useRef(null);
     const navigate = useNavigate();
 

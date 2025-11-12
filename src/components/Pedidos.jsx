@@ -5,7 +5,7 @@ import { apiFetch } from '../lib/api';
 
 export default function Pedidos({ userId }) {
     const [pedidos, setPedidos] = useState([]);
-    const [error, setError] = useState(null);
+    const [error] = useState(null);
 
     const fetchHistorial = useCallback(async () => {
         try {
@@ -18,7 +18,7 @@ export default function Pedidos({ userId }) {
 
     useEffect(() => {
         fetchHistorial();
-    }, [userId]);
+    }, [userId, fetchHistorial]);
 
     if (error) return <div>Error: {error}</div>;
 

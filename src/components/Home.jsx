@@ -15,7 +15,7 @@ function Home({ userData }) {
     const [quantities, setQuantities] = useState({});
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [dialogVisible, setDialogVisible] = useState(false);
-    const [productos, setProductos] = useState([]);
+    const [setProductos] = useState([]);
 
     const categorias = [
         { label: 'Mouse', value: 'Mouse' },
@@ -79,19 +79,6 @@ function Home({ userData }) {
             ...prev,
             [productoId]: value
         }));
-    };
-
-    const checkIfItemInCart = async (productoId) => {
-        try {
-            const cartData = await apiFetch('/cart/get'); 
-            if (cartData && cartData.items) {
-                return cartData.items.some(item => item.producto.id === productoId);
-            }
-            return false;
-        } catch (error) {
-            console.error('Error al verificar el carrito:', error);
-            return false;
-        }
     };
 
     const addToCart = async (productoId) => {
