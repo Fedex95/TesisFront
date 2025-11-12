@@ -41,7 +41,7 @@ function Home({ userData }) {
                 console.error('Error:', e);
             }
         })();
-    }, []);
+    }, [setProductos]);
 
     useEffect(() => {
         const fetchProductos = async () => {

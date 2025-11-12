@@ -34,7 +34,7 @@ function Cart({ userData }) {
                 life: 3000
             });
         }
-    }, []);
+    }, [setCartId]);
 
     useEffect(() => {
         if (userData?.id) {
