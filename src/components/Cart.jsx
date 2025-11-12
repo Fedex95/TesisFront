@@ -3,28 +3,26 @@ import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
 import { useNavigate } from 'react-router-dom';
+import { apiFetch } from '../lib/api';
 import '../styles/Cart.css';
 
 function Cart({ userData }) {
     const [cartItems, setCartItems] = useState([]);
+    const [cartId, setCartId] = useState(null); 
     const toast = useRef(null);
     const navigate = useNavigate();
 
     const fetchCartItems = useCallback(async () => {
         try {
-            const response = await fetch(`/api/usuarios/get/all`);
+            
+            const cartData = await apiFetch('/cart/get');
 
-            if (!response.ok) {
-                throw new Error('Error al cargar el carrito');
-            }
-
-            const users = await response.json();
-            const currentUser = users.find(user => user.id === userData.id);
-
-            if (currentUser && currentUser.cart && currentUser.cart.items) {
-                setCartItems(currentUser.cart.items);
+            if (cartData && cartData.items) {
+                setCartItems(cartData.items);
+                setCartId(cartData.id);
             } else {
                 setCartItems([]);
+                setCartId(null);
             }
 
         } catch (error) {
@@ -36,7 +34,7 @@ function Cart({ userData }) {
                 life: 3000
             });
         }
-    }, [userData.id]);
+    }, []);
 
     useEffect(() => {
         if (userData?.id) {
@@ -44,23 +42,11 @@ function Cart({ userData }) {
         }
     }, [userData, fetchCartItems]);
 
-    const removeItem = async (cartId, itemId) => {
-        if (!cartId) {
-            console.error('Cart ID is undefined. Cannot remove item.');
-            return;
-        }
-
+    const removeItem = async (itemId) => {
         try {
-            const response = await fetch(`/api/cart/eliminar/${cartId}/${itemId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+            await apiFetch(`/cart/eliminar/${itemId}`, {
+                method: 'DELETE'
             });
-
-            if (!response.ok) {
-                throw new Error('Error al eliminar el item');
-            }
 
             toast.current.show({
                 severity: 'success',
@@ -94,26 +80,9 @@ function Cart({ userData }) {
 
     const handlePayment = async () => {
         try {
-            if (!userData?.cart?.id) {
-                toast.current.show({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'No se encontró el carrito',
-                    life: 3000
-                });
-                return;
-            }
-
-            const response = await fetch(`/api/cart/pagar/${userData.cart.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+            await apiFetch('/cart/pagar', {
+                method: 'PUT'
             });
-
-            if (!response.ok) {
-                throw new Error('Error al procesar el pago');
-            }
 
             toast.current.show({
                 severity: 'success',
@@ -181,7 +150,7 @@ function Cart({ userData }) {
                                         <Button
                                             icon="pi pi-trash"
                                             className="p-button-danger p-button-text"
-                                            onClick={() => removeItem(userData.cart?.id, item.id)}
+                                            onClick={() => removeItem(item.id)} 
                                             tooltip="Eliminar"
                                         />
                                     </div>

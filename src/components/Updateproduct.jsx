@@ -3,6 +3,7 @@ import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
+import { apiFetch } from '../lib/api';
 
 export default function UpdateProducto({ userId, toast, onClose }) {
     const [productos, setProductos] = useState([]); 
@@ -30,12 +31,13 @@ export default function UpdateProducto({ userId, toast, onClose }) {
         { label: 'Monitores', value: 'Monitores' }
     ]
 
-    useEffect(() => {
-        fetch(`/api/producto/find/all`)
-            .then((response) => response.json())
-            .then((data) => setProductos(data))
-            .catch(() => {
-                if (toast && toast.current) {
+     useEffect(() => {
+            const fetchProductos = async () => {
+                try {
+                    const data = await apiFetch('/producto/find/all'); 
+                    setProductos(data);
+                } catch (error) {
+                    console.error('Error:', error);
                     toast.current.show({
                         severity: 'error',
                         summary: 'Error',
@@ -43,8 +45,10 @@ export default function UpdateProducto({ userId, toast, onClose }) {
                         life: 3000,
                     });
                 }
-            });
-    }, [toast]);
+            };
+            fetchProductos();
+        }, [toast]);
+    
 
     const handleProductSelect = (productoId) => {
         const selected = productos.find((producto) => producto.id === productoId);
@@ -65,7 +69,7 @@ export default function UpdateProducto({ userId, toast, onClose }) {
         setProductData({ ...productData, [field]: value });
     };
 
-    const handleUpdate = () => {
+    const handleUpdate = async () => {
         if (!selectedProducto) {
             toast.current.show({
                 severity: 'warn',
@@ -76,39 +80,28 @@ export default function UpdateProducto({ userId, toast, onClose }) {
             return;
         }
 
-        fetch(`/api/producto/edit/${selectedProducto}?userId=${userId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(productData),
-        })
-            .then((response) => {
-                if (response.ok) {
-                    toast.current.show({
-                        severity: 'success',
-                        summary: 'Éxito',
-                        detail: `El producto con ID ${selectedProducto} fue actualizado correctamente.`,
-                        life: 3000,
-                    });
-                    onClose(); 
-                } else {
-                    toast.current.show({
-                        severity: 'error',
-                        summary: 'Error',
-                        detail: `No se pudo actualizar el producto con ID ${selectedProducto}.`,
-                        life: 3000,
-                    });
-                }
-            })
-            .catch(() => {
-                toast.current.show({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Ocurrió un problema al intentar actualizar el producto.',
-                    life: 3000,
-                });
+        try {
+            await apiFetch(`/producto/edit/${selectedProducto}`, { 
+                method: 'PUT',
+                body: JSON.stringify(productData),
             });
+
+            toast.current.show({
+                severity: 'success',
+                summary: 'Éxito',
+                detail: `El producto con ID ${selectedProducto} fue actualizado correctamente.`,
+                life: 3000,
+            });
+            onClose();
+        } catch (error) {
+            console.error('Error:', error);
+            toast.current.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'No se pudo actualizar el producto.',
+                life: 3000,
+            });
+        }
     };
 
     return (
@@ -121,6 +114,7 @@ export default function UpdateProducto({ userId, toast, onClose }) {
                     options={productos.map((producto) => ({ label: producto.nombre, value: producto.id }))}
                     onChange={(e) => handleProductSelect(e.value)}
                     className="p-mb-3"
+                    aria-label="Seleccionar producto"
                 />
             </div>
 
@@ -132,6 +126,7 @@ export default function UpdateProducto({ userId, toast, onClose }) {
                             id="nombre"
                             value={productData.nombre}
                             onChange={(e) => handleChange(e, 'nombre')}
+                            aria-label="Nombre"
                         />
                     </div>
                     <div className="p-field">
@@ -140,6 +135,7 @@ export default function UpdateProducto({ userId, toast, onClose }) {
                             id="descripcion"
                             value={productData.descripcion}
                             onChange={(e) => handleChange(e, 'descripcion')}
+                            aria-label="Descripción"
                         />
                     </div>
                     <div className="p-field">
@@ -151,6 +147,7 @@ export default function UpdateProducto({ userId, toast, onClose }) {
                             mode="currency"
                             currency="USD"
                             locale="es-US"
+                            aria-label="Precio"
                         />
                     </div>
                     <div className="p-field">
@@ -159,6 +156,7 @@ export default function UpdateProducto({ userId, toast, onClose }) {
                             id="imagenURL"
                             value={productData.imagenURL}
                             onChange={(e) => handleChange(e, 'imagenURL')}
+                            aria-label="Imagen URL"
                         />
                     </div>
                     <div className="p-field">
@@ -168,6 +166,7 @@ export default function UpdateProducto({ userId, toast, onClose }) {
                             value={productData.categoria}
                             options={categorias}
                             onChange={(e) => handleChange(e, 'categoria')}
+                            aria-label="Categoría"
                         />
                     </div>
                     <Button label="Actualizar" icon="pi pi-check" onClick={handleUpdate} className="p-button-success p-mt-3" />

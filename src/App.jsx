@@ -13,33 +13,30 @@ import AdminView from './components/Adminview';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('isAuthenticated') === 'true';
+    return sessionStorage.getItem('isAuthenticated') === 'true';
   });
 
   const [userData, setUserData] = useState(() => {
-    const savedUser = localStorage.getItem('userData');
+    const savedUser = sessionStorage.getItem('userData'); // ya usa sessionStorage
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  const [admin, setAdmin] = useState(()=>{
-    return localStorage.getItem('admin') === 'true';
+  const [admin, setAdmin] = useState(() => {
+    return sessionStorage.getItem('admin') === 'true';
   });
 
   const [cartItems, setCartItems] = useState([]);
 
-  const handleLogin = (data) => {
+  const handleLogin = async (data) => {
     setIsAuthenticated(true);
     setUserData(data);
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('userData', JSON.stringify(data));
+    setAdmin(!!data.admin);
 
-    fetch(`/api/usuarios/${data.id}/admin`)
-      .then(response => response.json())
-      .then(isAdminResponse => {
-        setAdmin(isAdminResponse);
-        localStorage.setItem('admin', isAuthenticated);
-      })
-      .catch((error) => console.error('Error verifying admin status:', error));
+    sessionStorage.setItem('isAuthenticated', 'true');
+    sessionStorage.setItem('userData', JSON.stringify(data));
+    sessionStorage.setItem('admin', String(!!data.admin));
+    if (data?.token) sessionStorage.setItem('auth_token', data.token);
+   
   };
 
   const handleLogout = () => {
@@ -47,9 +44,13 @@ function App() {
     setUserData(null);
     setCartItems([]);
     setAdmin(false);
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userData');
-    localStorage.removeItem('admin');
+    sessionStorage.clear();
+  };
+
+  const ProtectedRoute = ({ children, requireAdmin = false }) => {
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    if (requireAdmin && !admin) return <Navigate to="/login" replace />;
+    return children;
   };
 
   return (
@@ -60,12 +61,12 @@ function App() {
 
         {isAuthenticated ? (
           <>
-            <Route path="/" element={<Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><Home userData={userData} /></Layout>} />
-            <Route path="/producto" element={<Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><Producto userData={userData} /></Layout>} />
-            <Route path="/perfil" element={<Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><PerfilUsuario userData={userData} /></Layout>} />
-            <Route path="/admin" element={isAuthenticated && admin ? <Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><AdminView userData={userData} /></Layout> : <Navigate to="/login" replace />} />
-            <Route path="/cart" element={<Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><Cart userData={userData} /></Layout>} />
-            <Route path="/pedidos" element={<Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><Pedidos userId={userData.id} /></Layout>} />
+            <Route path="/" element={<ProtectedRoute><Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><Home userData={userData} /></Layout></ProtectedRoute>} />
+            <Route path="/producto" element={<ProtectedRoute><Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><Producto userData={userData} /></Layout></ProtectedRoute>} />
+            <Route path="/perfil" element={<ProtectedRoute><Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><PerfilUsuario userData={userData} /></Layout></ProtectedRoute>} />
+            <Route path="/admin" element={isAuthenticated && admin ? <ProtectedRoute requireAdmin><Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><AdminView userData={userData} /></Layout></ProtectedRoute> : <Navigate to="/login" replace />} />
+            <Route path="/cart" element={<ProtectedRoute><Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><Cart userData={userData} /></Layout></ProtectedRoute>} />
+            <Route path="/pedidos" element={<ProtectedRoute><Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><Pedidos userId={userData.id} /></Layout></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </>
         ) : (

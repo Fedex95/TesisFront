@@ -5,13 +5,17 @@ import { Button } from 'primereact/button';
 import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
+import { apiFetch } from '../lib/api';
+import { useNavigate } from 'react-router-dom';
 
 function Home({ userData }) {
     const toast = useRef(null);
+    const navigate = useNavigate();
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [quantities, setQuantities] = useState({});
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [dialogVisible, setDialogVisible] = useState(false);
+    const [productos, setProductos] = useState([]);
 
     const categorias = [
         { label: 'Mouse', value: 'Mouse' },
@@ -29,10 +33,20 @@ function Home({ userData }) {
     ];
 
     useEffect(() => {
+        (async () => {
+            try {
+                const productos = await apiFetch('/producto/find/all');
+                setProductos(productos);
+            } catch (e) {
+                console.error('Error:', e);
+            }
+        })();
+    }, []);
+
+    useEffect(() => {
         const fetchProductos = async () => {
             try {
-                const response = await fetch(`/api/producto/find/all`);
-                const data = await response.json();
+                const data = await apiFetch('/producto/find/all'); 
 
                 if (data && data.length > 0) {
                     const shuffled = data.sort(() => 0.5 - Math.random());
@@ -50,8 +64,15 @@ function Home({ userData }) {
             }
         };
 
+        const token = sessionStorage.getItem('auth_token');
+        console.log('Token en Home:', token); 
+        if (!token) {
+            console.log('No hay token, redirigiendo a login');
+            navigate('/login');
+            return;
+        }
         fetchProductos();
-    }, []);
+    }, [navigate]);
 
     const handleQuantityChange = (productoId, value) => {
         setQuantities(prev => ({
@@ -62,16 +83,9 @@ function Home({ userData }) {
 
     const checkIfItemInCart = async (productoId) => {
         try {
-            const response = await fetch(`/api/usuarios/get/all`);
-            if (!response.ok) {
-                throw new Error('Error al verificar el carrito');
-            }
-
-            const users = await response.json();
-            const currentUser = users.find(user => user.id === userData.id);
-
-            if (currentUser?.cart?.items) {
-                return currentUser.cart.items.some(item => item.producto.id === productoId);
+            const cartData = await apiFetch('/cart/get'); 
+            if (cartData && cartData.items) {
+                return cartData.items.some(item => item.producto.id === productoId);
             }
             return false;
         } catch (error) {
@@ -90,35 +104,18 @@ function Home({ userData }) {
             });
             return;
         }
-
-        const isInCart = await checkIfItemInCart(productoId);
-        if (isInCart) {
-            toast.current.show({
-                severity: 'warn',
-                summary: 'Aviso',
-                detail: 'Este producto ya está en tu carrito',
-                life: 3000
-            });
-            return;
-        }
+        
 
         try {
             const quantity = quantities[productoId] || 1;
-            const response = await fetch(`/api/cart/agregar`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    usuarioId: userData.id,
-                    productoId: productoId,
-                    cantidad: quantity
-                })
+            await apiFetch('/cart/agregar', { 
+              method: 'POST',
+              body: JSON.stringify({
+                usuarioId: userData.id,
+                productoId: productoId,
+                cantidad: quantity
+              })
             });
-
-            if (!response.ok) {
-                throw new Error('Error al agregar al carrito');
-            }
 
             toast.current.show({
                 severity: 'success',
@@ -249,7 +246,7 @@ function Home({ userData }) {
                     numScroll={1}
                     responsiveOptions={responsiveOptions}
                     circular
-                    style={{ marginLeft: '10px', marginRight: '10px', display:'grid', gap:'20px' }} // Aquí aplicamos márgenes al contenedor
+                    style={{ marginLeft: '10px', marginRight: '10px', display:'grid', gap:'20px' }} 
                 />
             </div>
 
@@ -360,8 +357,8 @@ function Home({ userData }) {
                                         padding: '0',
                                         fontSize: '16px',
                                     }}
-                                    onClick={() => handleQuantityChange(selectedProduct.id, quantities[selectedProduct.id] - 1)}
-                                    disabled={quantities[selectedProduct.id] <= 1}
+                                    onClick={() => handleQuantityChange(selectedProduct.id, (quantities[selectedProduct.id] || 1) - 1)}
+                                    disabled={(quantities[selectedProduct.id] || 1) <= 1}
                                 />
                                 <span
                                     style={{
@@ -369,7 +366,7 @@ function Home({ userData }) {
                                         fontWeight: 'bold',
                                     }}
                                 >
-                                    {quantities[selectedProduct.id]}
+                                    {quantities[selectedProduct.id] || 1}
                                 </span>
                                 <Button
                                     icon="pi pi-plus"
@@ -380,7 +377,7 @@ function Home({ userData }) {
                                         padding: '0',
                                         fontSize: '16px',
                                     }}
-                                    onClick={() => handleQuantityChange(selectedProduct.id, quantities[selectedProduct.id] + 1)}
+                                    onClick={() => handleQuantityChange(selectedProduct.id, (quantities[selectedProduct.id] || 1) + 1)}
                                 />
                             </div>
                             <Button

@@ -4,7 +4,7 @@ jest.mock('@heroicons/react/24/solid', () => ({
 }));
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import MenuItem from './ProductoItem';
+import MenuItem from '../components/ProductoItem';
 
 const mockOnAddToCart = jest.fn();
 

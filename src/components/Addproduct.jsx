@@ -5,8 +5,9 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
+import { apiFetch } from '../lib/api';
 
-const AddProduct = ({ userId, onClose }) => {
+const AddProduct = ({ userId, onClose, userData }) => {
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [precio, setPrecio] = useState(null);
@@ -30,6 +31,7 @@ const AddProduct = ({ userId, onClose }) => {
 ]
 
   const handleSubmit = async () => {
+  
     if (!nombre || !descripcion || !precio || !imagenURL || !categoria) {
       toast.current.show({
         severity: 'warn',
@@ -48,25 +50,17 @@ const AddProduct = ({ userId, onClose }) => {
       categoria,
     };
 
-    try {
-      const response = await fetch(
-        `/api/producto/newproducto?userId=${userId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(nuevoProducto),
-        }
-      );
+    console.log('Enviando producto:', nuevoProducto);
 
-      if (!response.ok) {
-        throw new Error('No se pudo añadir el producto. Verifique si el usuario es administrador.');
-      }
+    try {
+      await apiFetch(`/producto/newproducto`, {
+        method: 'POST',
+        body: JSON.stringify(nuevoProducto),
+      });
 
       toast.current.show({
         severity: 'success',
-        summary: 'Menú creado',
+        summary: 'Producto añadido',
         detail: 'El producto se ha añadido exitosamente.',
         life: 3000,
       });
@@ -76,15 +70,16 @@ const AddProduct = ({ userId, onClose }) => {
       setPrecio(null);
       setImagenURL('');
       setCategoria(null);
-      onClose(); 
+      onClose();
     } catch (error) {
+      console.error('Error:', error);
       toast.current.show({
         severity: 'error',
         summary: 'Error',
         detail: error.message,
         life: 3000,
       });
-    } 
+    }
   };
 
   return (
@@ -155,4 +150,4 @@ const AddProduct = ({ userId, onClose }) => {
   );
 };
 
-export default AddProduct; 
+export default AddProduct;

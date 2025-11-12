@@ -3,6 +3,7 @@ import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
+import { apiFetch } from '../lib/api';
 
 export default function Menu({ userData }) {
     const [productos, setProductos] = useState([]);
@@ -29,8 +30,7 @@ export default function Menu({ userData }) {
     useEffect(() => {
         const fetchProductos = async () => {
             try {
-                const response = await fetch(`/api/producto/find/all`);
-                const data = await response.json();
+                const data = await apiFetch(`/producto/find/all`);
 
                 if (data && data.length > 0) {
                     const initialQuantities = {};

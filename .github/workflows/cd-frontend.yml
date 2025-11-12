@@ -72,7 +72,9 @@ jobs:
             docker rm frontend || echo "No container to remove"
 
             echo "Running new container..."
-            docker run -d --name frontend --network bdd_nginx_app-network \
+            docker run -d --name frontend \ 
+            -v /home/ec2-user/logs/frontend:/var/log/nginx \
+            --network bdd_nginx_app-network \
               ${{ secrets.DOCKERHUB_USERNAME }}/deploy-frontend:${{ github.sha }}
 
             echo "Verifying container..."

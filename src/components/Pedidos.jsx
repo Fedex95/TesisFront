@@ -1,25 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { apiFetch } from '../lib/api';
 
 export default function Pedidos({ userId }) {
     const [pedidos, setPedidos] = useState([]);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchHistorial = async () => {
-            try {
-                const response = await fetch(`/api/historial/${userId}`);
-                if (!response.ok) {
-                    throw new Error('Error al obtener el historial de pedidos');
-                }
-                const data = await response.json();
-                setPedidos(data);
-            } catch (error) {
-                setError(error.message);
-            }
-        };
+    const fetchHistorial = useCallback(async () => {
+        try {
+            const data = await apiFetch('/historial/user');
+            setPedidos(data);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }, []);
 
+    useEffect(() => {
         fetchHistorial();
     }, [userId]);
 

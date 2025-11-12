@@ -36,40 +36,36 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const {
-      nombre, apellido, usuario, cedula, email, pass, telefono, direccion, nombreTarjeta, numeroTarjeta, fechaValidez,
-      cvv
-    } = formData;
+    const { nombre, apellido, usuario, cedula, email, pass, telefono, direccion, nombreTarjeta, numeroTarjeta, fechaValidez, cvv } = formData;
 
-    if (!nombre || !apellido || !usuario || !cedula || !email || !pass || !telefono
-      || !direccion || !nombreTarjeta || !numeroTarjeta || !fechaValidez || !cvv) {
+    if (!nombre || !apellido || !usuario || !cedula || !email || !pass
+      || !cedula || !email || !cvv || !direccion || !nombreTarjeta || !numeroTarjeta || !fechaValidez
+    ) {
       toast.current.show({
         severity: 'warn',
-        detail: 'Completa todos los campos',
+        detail: 'Completa todos los campos obligatorios',
         life: 3000,
       });
       return;
     }
 
     const userData = {
-      id: 0,
+      usuario: usuario,
+      pass: pass,
       nombre: nombre,
       apellido: apellido,
-      usuario: usuario,
       cedula: cedula,
       email: email,
-      pass: pass,
       telefono: telefono,
       direccion: direccion,
-      nombreTarjeta: nombreTarjeta,
       numeroTarjeta: numeroTarjeta,
+      nombreTarjeta: nombreTarjeta,
       fechaValidez: fechaValidez,
       cvv: cvv,
-      rol: 'USER',
     };
 
     try {
-      const response = await fetch(`/api/usuarios/createUsuario`, {
+      const response = await fetch(`${process.env.REACT_APP_URL_BACKEND}/auth/register`, { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,11 +82,11 @@ function Register() {
         });
         navigate('/login');
       } else {
-        const errorData = await response.json();
+        const errorText = await response.text();
         toast.current.show({
           severity: 'error',
           summary: 'Error',
-          detail: errorData.message || 'Error al registrar el usuario',
+          detail: errorText || 'Error al registrar el usuario',
           life: 3000,
         });
       }
@@ -199,7 +195,7 @@ function Register() {
             <div>
               <label htmlFor="pass">Contraseña</label>
               <Password
-                id="pass"
+                inputId="pass"
                 name="pass"
                 value={formData.pass}
                 onChange={handleChange}

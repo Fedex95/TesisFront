@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Navbar from './Navbar';
+import Navbar from '../components/Navbar';
 
 const mockToggle = jest.fn();
 const mockUserMenu = { current: { toggle: mockToggle } };
@@ -12,7 +12,6 @@ const mockUserData = { nombre: 'Juan', apellido: 'Pérez' };
 const mockHandleNavigation = jest.fn();
 
 beforeAll(() => {
-  // Mock createStylesheet to avoid CSS parsing errors in JSDOM
   const helpers = require('jsdom/lib/jsdom/living/helpers/stylesheets');
   helpers.createStylesheet = jest.fn(() => ({}));
 });

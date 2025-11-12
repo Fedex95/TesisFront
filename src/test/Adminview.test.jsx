@@ -1,13 +1,12 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import AdminMenu from './Adminview';
+import AdminMenu from '../components/Adminview';
 
-jest.mock('./Addproduct', () => () => <div>Add Product Component</div>);
-jest.mock('./Pedido', () => () => <div>Pedido Component</div>);
-jest.mock('./Deleteproduct', () => () => <div>Delete Product Component</div>);
-jest.mock('./Updateproduct', () => () => <div>Update Product Component</div>);
+jest.mock('../components/Addproduct', () => () => <div>Add Product Component</div>);
+jest.mock('../components/Pedido', () => () => <div>Pedido Component</div>);
+jest.mock('../components/Deleteproduct', () => () => <div>Delete Product Component</div>);
+jest.mock('../components/Updateproduct', () => () => <div>Update Product Component</div>);
 
 beforeAll(() => {
-  // Mock createStylesheet to avoid CSS parsing errors
   const helpers = require('jsdom/lib/jsdom/living/helpers/stylesheets');
   helpers.createStylesheet = jest.fn(() => ({}));
 });
@@ -51,4 +50,23 @@ describe('AdminMenu Component', () => {
     expect(screen.getByText('Pedido Component')).toBeInTheDocument();
   });
 
+  test('closes dialog when close button is clicked', () => {
+    render(<AdminMenu userData={{ id: 1 }} />);
+    const addButton = screen.getByText('Agregar');
+    fireEvent.click(addButton);
+    expect(screen.getByText('Add Product Component')).toBeInTheDocument();
+  });
+
+  test('renders with userData prop', () => {
+    render(<AdminMenu userData={{ id: 2, admin: true }} />);
+    expect(screen.getByText('Agregar')).toBeInTheDocument();
+  });
+
+  test('does not render dialogs initially', () => {
+    render(<AdminMenu userData={{ id: 1 }} />);
+    expect(screen.queryByText('Add Product Component')).not.toBeInTheDocument();
+    expect(screen.queryByText('Update Product Component')).not.toBeInTheDocument();
+    expect(screen.queryByText('Delete Product Component')).not.toBeInTheDocument();
+    expect(screen.queryByText('Pedido Component')).not.toBeInTheDocument();
+  });
 });

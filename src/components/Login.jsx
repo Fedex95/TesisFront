@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiFetch } from '../lib/api';
+import { decodeJwt } from '../lib/jwt';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
@@ -15,7 +17,6 @@ function Login({ onLogin }) {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-
         if (!usuario || !pass) {
             toast.current.show({
                 severity: 'warn',
@@ -25,57 +26,53 @@ function Login({ onLogin }) {
             });
             return;
         }
-
         try {
-            const verifyResponse = await fetch(
-                `/api/usuarios/viewPass?usuario=${usuario}&pass=${pass}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                }
-            );
-
-            if (verifyResponse.status === 200) {
-                const usersResponse = await fetch(`/api/usuarios/get/all`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (usersResponse.ok) {
-                    const users = await usersResponse.json();
-                    const currentUser = users.find(user => user.usuario === usuario);
-
-                    if (currentUser) {
-                        onLogin(currentUser);
-                        toast.current.show({
-                            severity: 'success',
-                            summary: 'Éxito',
-                            detail: 'Inicio de sesión exitoso',
-                            life: 3000
-                        });
-                        setUsuario('');
-                        setPass('');
-                        navigate('/home');
-                    }
-                }
-            } else {
+            const data = await apiFetch('/auth/login', {
+              method: 'POST',
+              body: JSON.stringify({ usuario, pass })
+            });
+            if (!data?.token) {
                 toast.current.show({
                     severity: 'error',
                     summary: 'Error',
-                    detail: 'Usuario o contraseña incorrectos',
+                    detail: 'Token de autenticación no recibido',
                     life: 3000
                 });
+                return;
             }
+
+            // guardar token en sesión
+            sessionStorage.setItem('auth_token', data.token);
+            const claims = decodeJwt(data.token);
+            console.log('Claims decodificados:', claims);
+            const user = {
+              id: claims?.userId ?? claims?.id,
+              nombre: claims?.nombre || claims?.sub,
+              admin: claims?.rol === 'ADMIN' || claims?.admin === true, 
+              token: data.token
+            };
+
+            // persistir sesión
+            sessionStorage.setItem('isAuthenticated', 'true');
+            sessionStorage.setItem('userData', JSON.stringify(user));
+            sessionStorage.setItem('admin', String(user.admin));
+
+            onLogin(user);
+            toast.current.show({
+                severity: 'success',
+                summary: 'Éxito',
+                detail: 'Inicio de sesión exitoso',
+                life: 3000
+            });
+            setUsuario('');
+            setPass('');
+            navigate('/home');
         } catch (error) {
-            console.error('Error:', error);
+            console.error(error);
             toast.current.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Error al iniciar sesión',
+                detail: 'Error de red',
                 life: 3000
             });
         }
