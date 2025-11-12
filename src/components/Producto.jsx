@@ -30,7 +30,7 @@ export default function Menu({ userData }) {
     useEffect(() => {
         const fetchProductos = async () => {
             try {
-                const data = await apiFetch(`/producto/find/all`);
+                const data = await apiFetch(`/api/producto/find/all`);
 
                 if (data && data.length > 0) {
                     const initialQuantities = {};

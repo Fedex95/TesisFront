@@ -34,7 +34,7 @@ export default function UpdateProducto({ userId, toast, onClose }) {
      useEffect(() => {
             const fetchProductos = async () => {
                 try {
-                    const data = await apiFetch('/producto/find/all'); 
+                    const data = await apiFetch('/api/producto/find/all'); 
                     setProductos(data);
                 } catch (error) {
                     console.error('Error:', error);
@@ -81,7 +81,7 @@ export default function UpdateProducto({ userId, toast, onClose }) {
         }
 
         try {
-            await apiFetch(`/producto/edit/${selectedProducto}`, { 
+            await apiFetch(`/api/producto/edit/${selectedProducto}`, { 
                 method: 'PUT',
                 body: JSON.stringify(productData),
             });

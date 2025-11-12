@@ -9,7 +9,7 @@ export default function Pedidos({ userId }) {
 
     const fetchHistorial = useCallback(async () => {
         try {
-            const data = await apiFetch('/historial/user');
+            const data = await apiFetch('/api/historial/user');
             setPedidos(data);
         } catch (error) {
             console.error('Error:', error);

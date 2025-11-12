@@ -27,7 +27,7 @@ function Login({ onLogin }) {
             return;
         }
         try {
-            const data = await apiFetch('/api/auth/login', {
+            const data = await apiFetch('/api/api/auth/login', {
               method: 'POST',
               body: JSON.stringify({ usuario, pass })
             });

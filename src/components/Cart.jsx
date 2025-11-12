@@ -15,7 +15,7 @@ function Cart({ userData }) {
     const fetchCartItems = useCallback(async () => {
         try {
             
-            const cartData = await apiFetch('/cart/get');
+            const cartData = await apiFetch('/api/cart/get');
 
             if (cartData && cartData.items) {
                 setCartItems(cartData.items);
@@ -80,7 +80,7 @@ function Cart({ userData }) {
 
     const handlePayment = async () => {
         try {
-            await apiFetch('/cart/pagar', {
+            await apiFetch('/api/cart/pagar', {
                 method: 'PUT'
             });
 

@@ -9,7 +9,7 @@ export default function Pedido({ userData }) {
         const fetchPedidos = async () => {
             if (!userData?.id) return;
             try {
-                const data = await apiFetch('/historial/all');
+                const data = await apiFetch('/api/historial/all');
                 setPedidos(data);
             } catch (error) {
                 console.error('Error fetching orders:', error);

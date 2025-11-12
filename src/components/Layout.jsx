@@ -20,7 +20,7 @@ export default function Layout({ children, onLogout, cartItemsCount, userData })
         (async () => {
           if (!userData?.id) return;
           try {
-            const isAdmin = await apiFetch(`/usuarios/${userData.id}/admin`);
+            const isAdmin = await apiFetch(`/api/usuarios/${userData.id}/admin`);
             setAdmin(!!isAdmin);
           } catch (error) {
             console.error('Error verificando si el usuario es admin:', error);

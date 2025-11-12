@@ -53,7 +53,7 @@ const AddProduct = ({ userId, onClose, userData }) => {
     console.log('Enviando producto:', nuevoProducto);
 
     try {
-      await apiFetch(`/producto/newproducto`, {
+      await apiFetch(`/api/producto/newproducto`, {
         method: 'POST',
         body: JSON.stringify(nuevoProducto),
       });

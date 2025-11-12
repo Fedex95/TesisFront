@@ -10,7 +10,7 @@ export default function DeleteProducto({ userId, toast, onClose }) {
     useEffect(() => {
         const fetchProductos = async () => {
             try {
-                const data = await apiFetch('/producto/find/all'); 
+                const data = await apiFetch('/api/producto/find/all'); 
                 setProductos(data);
             } catch (error) {
                 console.error('Error:', error);
@@ -27,7 +27,7 @@ export default function DeleteProducto({ userId, toast, onClose }) {
 
     const handleDelete = async (productoId) => {
         try {
-            await apiFetch(`/producto/delete/${productoId}`, { 
+            await apiFetch(`/api/producto/delete/${productoId}`, { 
                 method: 'DELETE'
             });
             toast.current.show({

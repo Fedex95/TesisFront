@@ -35,7 +35,7 @@ function Home({ userData }) {
     useEffect(() => {
         (async () => {
             try {
-                const productos = await apiFetch('/producto/find/all');
+                const productos = await apiFetch('/api/producto/find/all');
                 setProductos(productos);
             } catch (e) {
                 console.error('Error:', e);
@@ -47,7 +47,7 @@ function Home({ userData }) {
     useEffect(() => {
         const fetchProductos = async () => {
             try {
-                const data = await apiFetch('/producto/find/all'); 
+                const data = await apiFetch('/api/producto/find/all'); 
 
                 if (data && data.length > 0) {
                     const shuffled = data.sort(() => 0.5 - Math.random());
@@ -96,7 +96,7 @@ function Home({ userData }) {
 
         try {
             const quantity = quantities[productoId] || 1;
-            await apiFetch('/cart/agregar', { 
+            await apiFetch('/api/cart/agregar', { 
               method: 'POST',
               body: JSON.stringify({
                 usuarioId: userData.id,
