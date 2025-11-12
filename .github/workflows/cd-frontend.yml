@@ -31,6 +31,8 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+        env:
+          REACT_APP_URL_BACKEND: ${{ secrets.REACT_APP_URL_BACKEND }}
 
       - name: Build Docker image
         run: |
