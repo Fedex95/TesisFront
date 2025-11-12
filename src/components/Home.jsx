@@ -15,7 +15,7 @@ function Home({ userData }) {
     const [quantities, setQuantities] = useState({});
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [dialogVisible, setDialogVisible] = useState(false);
-    const [setProductos] = useState([]);
+    const [productos, setProductos] = useState([]);  
 
     const categorias = [
         { label: 'Mouse', value: 'Mouse' },

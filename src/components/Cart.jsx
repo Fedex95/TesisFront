@@ -8,7 +8,7 @@ import '../styles/Cart.css';
 
 function Cart({ userData }) {
     const [cartItems, setCartItems] = useState([]);
-    const [setCartId] = useState(null); 
+    const [cartId, setCartId] = useState(null); 
     const toast = useRef(null);
     const navigate = useNavigate();
 
@@ -34,7 +34,7 @@ function Cart({ userData }) {
                 life: 3000
             });
         }
-    }, [setCartId]);
+    }, []);  
 
     useEffect(() => {
         if (userData?.id) {
@@ -44,7 +44,7 @@ function Cart({ userData }) {
 
     const removeItem = async (itemId) => {
         try {
-            await apiFetch(`/cart/eliminar/${itemId}`, {
+            await apiFetch(`/api/cart/eliminar/${itemId}`, {
                 method: 'DELETE'
             });
 

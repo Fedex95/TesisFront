@@ -16,7 +16,7 @@ export default function Profile({ userData }) {
                 return;
             }
             try {
-                const data = await apiFetch(`/usuario/getUsuario/${userData.id}`);
+                const data = await apiFetch(`/api/usuario/getUsuario/${userData.id}`);
                 setProfileData(data);
             } catch (err) {
                 console.error('Error al obtener perfil:', err);
