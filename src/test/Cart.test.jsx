@@ -22,19 +22,19 @@ const mockCartData = {
     {
       id: 1,
       cantidad: 2,
-      producto: {
-        nombre: 'Producto 1',
-        precio: 10.0,
-        imagenURL: 'http://example.com/image.jpg',
+      libro: {
+        titulo: 'Libro 1',
+        autor: 'Autor 1',
+        imagenUrl: 'http://example.com/image.jpg',
       },
     },
     {
       id: 2,
       cantidad: 1,
-      producto: {
-        nombre: 'Producto 2',
-        precio: 20.0,
-        imagenURL: 'http://example.com/image2.jpg',
+      libro: {
+        titulo: 'Libro 2',
+        autor: 'Autor 2',
+        imagenUrl: 'http://example.com/image2.jpg',
       },
     },
   ],
@@ -54,7 +54,7 @@ describe('Cart Component', () => {
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
-    expect(screen.getByText('Carrito')).toBeInTheDocument();
+    expect(screen.getByText('Carrito de Préstamos')).toBeInTheDocument();
   });
 
   test('renders catalog button', () => {
@@ -101,7 +101,7 @@ describe('Cart Component', () => {
       </BrowserRouter>
     );
     await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledWith('/cart/get');
+      expect(apiFetch).toHaveBeenCalledWith('/api/cart/get');
     });
   });
 
@@ -113,26 +113,12 @@ describe('Cart Component', () => {
       </BrowserRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText('Producto 1')).toBeInTheDocument();
-      expect(screen.getByText('Producto 2')).toBeInTheDocument();
-      expect(screen.getByText('$10')).toBeInTheDocument();
-      expect(screen.getByText('$20')).toBeInTheDocument();
+      expect(screen.getByText('Libro 1')).toBeInTheDocument();
+      expect(screen.getByText('Libro 2')).toBeInTheDocument();
+      expect(screen.getByText('Autor: Autor 1')).toBeInTheDocument();
+      expect(screen.getByText('Autor: Autor 2')).toBeInTheDocument();
       expect(screen.getByText('Cantidad: 2')).toBeInTheDocument();
       expect(screen.getByText('Cantidad: 1')).toBeInTheDocument();
-    });
-  });
-
-  test('calculates total correctly', async () => {
-    apiFetch.mockResolvedValueOnce(mockCartData);
-    render(
-      <BrowserRouter>
-        <Cart userData={mockUserData} />
-      </BrowserRouter>
-    );
-    await waitFor(() => {
-      const amounts = screen.getAllByText('$40.00')
-      expect(amounts[0]).toBeInTheDocument();
-      expect(amounts[1]).toBeInTheDocument();
     });
   });
 
@@ -146,18 +132,18 @@ describe('Cart Component', () => {
       </BrowserRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText('Producto 1')).toBeInTheDocument();
+      expect(screen.getByText('Libro 1')).toBeInTheDocument();
     });
     const removeButtons = screen.getAllByRole('button');
     const removeButton = removeButtons.find(btn => btn.className.includes('p-button-danger'));
     fireEvent.click(removeButton);
     await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledWith('/cart/eliminar/1', { method: 'DELETE' });
-      expect(screen.getByText('Producto eliminado del carrito')).toBeInTheDocument();
+      expect(apiFetch).toHaveBeenCalledWith('/api/cart/eliminar/1', { method: 'DELETE' });
+      expect(screen.getByText('Libro eliminado del carrito')).toBeInTheDocument();
     });
   });
 
-  test('handles payment successfully', async () => {
+  test('handles loan request successfully', async () => {
     apiFetch.mockResolvedValueOnce(mockCartData);
     apiFetch.mockResolvedValueOnce(); 
     apiFetch.mockResolvedValueOnce({ items: [] }); 
@@ -167,15 +153,15 @@ describe('Cart Component', () => {
       </BrowserRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText('Proceder al pago')).toBeInTheDocument();
+      expect(screen.getByText('Solicitar Préstamo')).toBeInTheDocument();
     });
     
-    const paymentButton = screen.getByRole('button', { name: /proceder al pago/i });
-    expect(paymentButton).not.toBeDisabled();
-    fireEvent.click(paymentButton);
+    const loanButton = screen.getByRole('button', { name: /solicitar préstamo/i });
+    expect(loanButton).not.toBeDisabled();
+    fireEvent.click(loanButton);
     await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledWith('/cart/pagar', { method: 'PUT' });
-      expect(screen.getByText('Pago procesado correctamente')).toBeInTheDocument();
+      expect(apiFetch).toHaveBeenCalledWith('/api/prestamos', { method: 'POST', body: JSON.stringify({ items: mockCartData.items }) });
+      expect(screen.getByText('Préstamo solicitado exitosamente')).toBeInTheDocument();
     });
   });
 
@@ -200,31 +186,31 @@ describe('Cart Component', () => {
       </BrowserRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText('Producto 1')).toBeInTheDocument();
+      expect(screen.getByText('Libro 1')).toBeInTheDocument();
     });
     const removeButtons = screen.getAllByRole('button');
     const removeButton = removeButtons.find(btn => btn.classList.contains('p-button-danger'));
     fireEvent.click(removeButton);
     await waitFor(() => {
-      expect(screen.getByText('No se pudo eliminar el producto')).toBeInTheDocument();
+      expect(screen.getByText('No se pudo eliminar el libro')).toBeInTheDocument();
     });
   });
 
-  test('shows error on payment failure', async () => {
+  test('shows error on loan failure', async () => {
     apiFetch.mockResolvedValueOnce(mockCartData);
-    apiFetch.mockRejectedValueOnce(new Error('Payment error'));
+    apiFetch.mockRejectedValueOnce(new Error('Loan error'));
     render(
       <BrowserRouter>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText('Proceder al pago')).toBeInTheDocument();
+      expect(screen.getByText('Solicitar Préstamo')).toBeInTheDocument();
     });
-    const paymentButton = screen.getByText('Proceder al pago');
-    fireEvent.click(paymentButton);
+    const loanButton = screen.getByText('Solicitar Préstamo');
+    fireEvent.click(loanButton);
     await waitFor(() => {
-      expect(screen.getByText('No se pudo procesar el pago')).toBeInTheDocument();
+      expect(screen.getByText('Loan error')).toBeInTheDocument();
     });
   });
 

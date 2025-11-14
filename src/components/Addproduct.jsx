@@ -5,34 +5,28 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
-import { apiFetch } from '../lib/api';
+import { apiFetch } from '../lib/api';  
 
-const AddProduct = ({ userId, onClose, userData }) => {
-  const [nombre, setNombre] = useState('');
+const AddLibro = ({ onClose }) => { 
+  const [titulo, setTitulo] = useState('');  
+  const [autor, setAutor] = useState('');  
   const [descripcion, setDescripcion] = useState('');
-  const [precio, setPrecio] = useState(null);
-  const [imagenURL, setImagenURL] = useState('');
+  const [isbn, setIsbn] = useState('');  
+  const [imagenUrl, setImagenUrl] = useState('');  
   const [categoria, setCategoria] = useState(null);
+  const [copiasDisponibles, setCopiasDisponibles] = useState(null);  
   const toast = React.useRef(null);
 
   const category = [
-    { label: 'Mouse', value: 'Mouse' },
-    { label: 'Teclado', value: 'Teclado' },
-    { label: 'Case', value: 'Case' },
-    { label: 'Procesador', value: 'Procesador' },
-    { label: 'Tarjeta Gráfica', value: 'TarjetaGrafica' },
-    { label: 'Memoria RAM', value: 'MemoriaRAM' },
-    { label: 'Memoria ROM', value: 'MemoriaROM' },
-    { label: 'Placa Madre', value: 'PlacaMadre' },
-    { label: 'Accesorios', value: 'Accesorios' },
-    { label: 'Fuente de Poder', value: 'FuentePoder' },
-    { label: 'Ventilador', value: 'Ventilador' },
-    { label: 'Monitores', value: 'Monitor' }
-]
+    { label: 'Ficción', value: 'Ficción' },
+    { label: 'No Ficción', value: 'NoFicción' },
+    { label: 'Ciencia', value: 'Ciencia' },
+    { label: 'Historia', value: 'Historia' },
+    { label: 'Biografía', value: 'Biografía' },
+  ];
 
   const handleSubmit = async () => {
-  
-    if (!nombre || !descripcion || !precio || !imagenURL || !categoria) {
+    if (!titulo || !autor || !descripcion || !isbn || !imagenUrl || !categoria || copiasDisponibles === null) {
       toast.current.show({
         severity: 'warn',
         summary: 'Campos requeridos',
@@ -42,34 +36,37 @@ const AddProduct = ({ userId, onClose, userData }) => {
       return;
     }
 
-    const nuevoProducto = {
-      nombre,
+    const nuevoLibro = {
+      titulo,
+      autor,
       descripcion,
-      precio,
-      imagenURL,
+      isbn,
+      imagenUrl,
       categoria,
+      copiasDisponibles,
     };
 
-    console.log('Enviando producto:', nuevoProducto);
-
     try {
-      await apiFetch(`/api/producto/newproducto`, {
+      await apiFetch(`/api/libros`, {  
         method: 'POST',
-        body: JSON.stringify(nuevoProducto),
+        body: JSON.stringify(nuevoLibro),
       });
 
       toast.current.show({
         severity: 'success',
-        summary: 'Producto añadido',
-        detail: 'El producto se ha añadido exitosamente.',
+        summary: 'Libro añadido',
+        detail: 'El libro se ha añadido exitosamente.',
         life: 3000,
       });
 
-      setNombre('');
+      // Limpiar campos
+      setTitulo('');
+      setAutor('');
       setDescripcion('');
-      setPrecio(null);
-      setImagenURL('');
+      setIsbn('');
+      setImagenUrl('');
       setCategoria(null);
+      setCopiasDisponibles(null);
       onClose();
     } catch (error) {
       console.error('Error:', error);
@@ -87,11 +84,19 @@ const AddProduct = ({ userId, onClose, userData }) => {
       <Toast ref={toast} />
       <div className="p-fluid p-formgrid p-grid">
         <div className="p-field p-col-12">
-          <label htmlFor="nombre">Nombre</label>
+          <label htmlFor="titulo">Título</label>
           <InputText
-            id="nombre"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
+            id="titulo"
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+          />
+        </div>
+        <div className="p-field p-col-12">
+          <label htmlFor="autor">Autor</label>
+          <InputText
+            id="autor"
+            value={autor}
+            onChange={(e) => setAutor(e.target.value)}
           />
         </div>
         <div className="p-field p-col-12">
@@ -104,14 +109,11 @@ const AddProduct = ({ userId, onClose, userData }) => {
           />
         </div>
         <div className="p-field p-col-6">
-          <label htmlFor="precio">Precio</label>
-          <InputNumber
-            id="precio"
-            value={precio}
-            onValueChange={(e) => setPrecio(e.value)}
-            mode="currency"
-            currency="USD"
-            locale="en-US"
+          <label htmlFor="isbn">ISBN</label>
+          <InputText
+            id="isbn"
+            value={isbn}
+            onChange={(e) => setIsbn(e.target.value)}
           />
         </div>
         <div className="p-field p-col-6">
@@ -123,12 +125,21 @@ const AddProduct = ({ userId, onClose, userData }) => {
             onChange={(e) => setCategoria(e.value)}
           />
         </div>
-        <div className="p-field p-col-12">
-          <label htmlFor="imagenURL">URL de la Imagen</label>
+        <div className="p-field p-col-6">
+          <label htmlFor="imagenUrl">URL de la Imagen</label>
           <InputText
-            id="imagenURL"
-            value={imagenURL}
-            onChange={(e) => setImagenURL(e.target.value)}
+            id="imagenUrl"
+            value={imagenUrl}
+            onChange={(e) => setImagenUrl(e.target.value)}
+          />
+        </div>
+        <div className="p-field p-col-6">
+          <label htmlFor="copiasDisponibles">Copias Disponibles</label>
+          <InputNumber
+            inputId="copiasDisponibles"
+            value={copiasDisponibles}
+            onValueChange={(e) => setCopiasDisponibles(e.value)}
+            min={0}
           />
         </div>
       </div>
@@ -150,4 +161,4 @@ const AddProduct = ({ userId, onClose, userData }) => {
   );
 };
 
-export default AddProduct;
+export default AddLibro;  

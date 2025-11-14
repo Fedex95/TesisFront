@@ -21,94 +21,94 @@ describe('Menu Component', () => {
   });
 
   test('fetches and displays products', async () => {
-    const mockProducts = [
+    const mockLibros = [
       {
         id: 1,
-        nombre: 'Producto 1',
+        titulo: 'Libro 1',
         descripcion: 'Descripción 1',
-        precio: 10.0,
-        categoria: 'Mouse',
-        imagenURL: 'url1',
+        autor: 'Autor 1',
+        categoria: 'Ficción',
+        imagenUrl: 'url1',
       },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
+    apiFetch.mockResolvedValueOnce(mockLibros);
 
     render(<Menu userData={{ id: 1 }} />);
 
-    const prod = await screen.findByText('Producto 1');
-    const price = await screen.findByText('$10.00');
-    expect(prod).toBeInTheDocument();
-    expect(price).toBeInTheDocument();
+    const libro = await screen.findByText('Libro 1');
+    const autor = await screen.findByText('Autor: Autor 1');
+    expect(libro).toBeInTheDocument();
+    expect(autor).toBeInTheDocument();
   });
 
   test('opens dialog on product click', async () => {
-    const mockProducts = [
+    const mockLibros = [
       {
         id: 1,
-        nombre: 'Producto 1',
+        titulo: 'Libro 1',
         descripcion: 'Descripción 1',
-        precio: 10.0,
-        categoria: 'Mouse',
-        imagenURL: 'url1',
+        autor: 'Autor 1',
+        categoria: 'Ficción',
+        imagenUrl: 'url1',
       },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
+    apiFetch.mockResolvedValueOnce(mockLibros);
 
     render(<Menu userData={{ id: 1 }} />);
 
-    const prod = await screen.findByText('Producto 1');
-    fireEvent.click(prod);
-    const details = await screen.findByText('Detalles del plato');
+    const libro = await screen.findByText('Libro 1');
+    fireEvent.click(libro);
+    const details = await screen.findByText('Detalles del libro');
     expect(details).toBeInTheDocument();
   });
 
   test('adds to cart successfully', async () => {
-    const mockProducts = [
+    const mockLibros = [
       {
         id: 1,
-        nombre: 'Producto 1',
+        titulo: 'Libro 1',
         descripcion: 'Descripción 1',
-        precio: 10.0,
-        categoria: 'Mouse',
-        imagenURL: 'url1',
+        autor: 'Autor 1',
+        categoria: 'Ficción',
+        imagenUrl: 'url1',
       },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
-    mockFetch.mockResolvedValueOnce({
+    apiFetch.mockResolvedValueOnce(mockLibros);
+    apiFetch.mockResolvedValueOnce({
       ok: true,
     });
 
     render(<Menu userData={{ id: 1 }} />);
 
-    const prod = await screen.findByText('Producto 1');
-    fireEvent.click(prod);
+    const libro = await screen.findByText('Libro 1');
+    fireEvent.click(libro);
     const addBtn = screen.getByText('Agregar al carrito');
     fireEvent.click(addBtn);
 
-    const successMsg = await screen.findByText('Producto 1 agregado al carrito');
+    const successMsg = await screen.findByText('Libro 1 agregado al carrito');
     expect(successMsg).toBeInTheDocument();
   });
 
   test('handles add to cart error', async () => {
-    const mockProducts = [
+    const mockLibros = [
       {
         id: 1,
-        nombre: 'Producto 1',
+        titulo: 'Libro 1',
         descripcion: 'Descripción 1',
-        precio: 10.0,
-        categoria: 'Mouse',
-        imagenURL: 'url1',
+        autor: 'Autor 1',
+        categoria: 'Ficción',
+        imagenUrl: 'url1',
       },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
-    mockFetch.mockResolvedValueOnce({
+    apiFetch.mockResolvedValueOnce(mockLibros);
+    apiFetch.mockResolvedValueOnce({
       ok: false,
     });
 
     render(<Menu userData={{ id: 1 }} />);
 
-    const prod = await screen.findByText('Producto 1');
-    fireEvent.click(prod);
+    const libro = await screen.findByText('Libro 1');
+    fireEvent.click(libro);
     const addBtn = screen.getByText('Agregar al carrito');
     fireEvent.click(addBtn);
 
@@ -130,94 +130,94 @@ describe('Menu Component', () => {
   });
 
   test('displays products in categories', async () => {
-    const mockProducts = [
+    const mockLibros = [
       {
         id: 1,
-        nombre: 'Producto 1',
+        titulo: 'Libro 1',
         descripcion: 'Descripción 1',
-        precio: 10.0,
-        categoria: 'Mouse',
-        imagenURL: 'url1',
+        autor: 'Autor 1',
+        categoria: 'Ficción',
+        imagenUrl: 'url1',
       },
       {
         id: 2,
-        nombre: 'Producto 2',
+        titulo: 'Libro 2',
         descripcion: 'Descripción 2',
-        precio: 20.0,
-        categoria: 'Teclado',
-        imagenURL: 'url2',
+        autor: 'Autor 2',
+        categoria: 'NoFicción',
+        imagenUrl: 'url2',
       },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
+    apiFetch.mockResolvedValueOnce(mockLibros);
 
     render(<Menu userData={{ id: 1 }} />);
 
-    const mouseTitle = await screen.findAllByText('Mouse');
-    const tecladoTitle = await screen.findAllByText('Teclado');
-    expect(mouseTitle.length).toBeGreaterThan(0);
-    expect(tecladoTitle.length).toBeGreaterThan(0);
+    const ficcionTitle = await screen.findAllByText('Ficción');
+    const noFiccionTitle = await screen.findAllByText('No Ficción');
+    expect(ficcionTitle.length).toBeGreaterThan(0);
+    expect(noFiccionTitle.length).toBeGreaterThan(0);
   });
 
   test('closes dialog on hide', async () => {
-    const mockProducts = [
+    const mockLibros = [
       {
         id: 1,
-        nombre: 'Producto 1',
+        titulo: 'Libro 1',
         descripcion: 'Descripción 1',
-        precio: 10.0,
-        categoria: 'Mouse',
-        imagenURL: 'url1',
+        autor: 'Autor 1',
+        categoria: 'Ficción',
+        imagenUrl: 'url1',
       },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
+    apiFetch.mockResolvedValueOnce(mockLibros);
 
     render(<Menu userData={{ id: 1 }} />);
 
-    const prod = await screen.findByText('Producto 1');
-    fireEvent.click(prod);
-    expect(screen.getByText('Detalles del plato')).toBeInTheDocument();
+    const libro = await screen.findByText('Libro 1');
+    fireEvent.click(libro);
+    expect(screen.getByText('Detalles del libro')).toBeInTheDocument();
     // Simulate hide, but since it's modal, perhaps click outside or something, but hard to test.
   });
 
   test('displays product description in dialog', async () => {
-    const mockProducts = [
+    const mockLibros = [
       {
         id: 1,
-        nombre: 'Producto 1',
+        titulo: 'Libro 1',
         descripcion: 'Descripción 1',
-        precio: 10.0,
-        categoria: 'Mouse',
-        imagenURL: 'url1',
+        autor: 'Autor 1',
+        categoria: 'Ficción',
+        imagenUrl: 'url1',
       },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
+    apiFetch.mockResolvedValueOnce(mockLibros);
 
     render(<Menu userData={{ id: 1 }} />);
 
-    const prod = await screen.findByText('Producto 1');
-    fireEvent.click(prod);
+    const libro = await screen.findByText('Libro 1');
+    fireEvent.click(libro);
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByText('Descripción 1')).toBeInTheDocument();
   });
 
   test('handles add to cart network error', async () => {
-    const mockProducts = [
+    const mockLibros = [
       {
         id: 1,
-        nombre: 'Producto 1',
+        titulo: 'Libro 1',
         descripcion: 'Descripción 1',
-        precio: 10.0,
-        categoria: 'Mouse',
-        imagenURL: 'url1',
+        autor: 'Autor 1',
+        categoria: 'Ficción',
+        imagenUrl: 'url1',
       },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
-    mockFetch.mockRejectedValueOnce(new Error('Network error'));
+    apiFetch.mockResolvedValueOnce(mockLibros);
+    apiFetch.mockRejectedValueOnce(new Error('Network error'));
 
     render(<Menu userData={{ id: 1 }} />);
 
-    const prod = await screen.findByText('Producto 1');
-    fireEvent.click(prod);
+    const libro = await screen.findByText('Libro 1');
+    fireEvent.click(libro);
     const addBtn = screen.getByText('Agregar al carrito');
     fireEvent.click(addBtn);
 
@@ -225,23 +225,22 @@ describe('Menu Component', () => {
     expect(errMsg).toBeInTheDocument();
   });
 
-
   test('renders cards for products', async () => {
-    const mockProducts = [
+    const mockLibros = [
       {
         id: 1,
-        nombre: 'Producto 1',
+        titulo: 'Libro 1',
         descripcion: 'Descripción 1',
-        precio: 10.0,
-        categoria: 'Mouse',
-        imagenURL: 'url1',
+        autor: 'Autor 1',
+        categoria: 'Ficción',
+        imagenUrl: 'url1',
       },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
+    apiFetch.mockResolvedValueOnce(mockLibros);
 
     render(<Menu userData={{ id: 1 }} />);
 
-    const card = await screen.findByText(/Producto 1/i);
+    const card = await screen.findByText(/Libro 1/i);
     expect(card).toBeInTheDocument();
   });
 
@@ -251,7 +250,7 @@ describe('Menu Component', () => {
     render(<Menu userData={{ id: 1 }} />);
 
     await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledWith('/producto/find/all');
+      expect(apiFetch).toHaveBeenCalledWith('/api/libros');
     });
   });
 });

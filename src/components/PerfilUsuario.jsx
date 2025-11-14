@@ -16,7 +16,7 @@ export default function Profile({ userData }) {
                 return;
             }
             try {
-                const data = await apiFetch(`/api/usuario/getUsuario/${userData.id}`);
+                const data = await apiFetch(`/api/usuario/getUsuario/${userData.id}`);  
                 setProfileData(data);
             } catch (err) {
                 console.error('Error al obtener perfil:', err);
@@ -39,32 +39,20 @@ export default function Profile({ userData }) {
                 <Card className="profile-card p-6 shadow-lg rounded-lg">
                     <div className="profile-info grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div className="profile-item">
-                            <h3 className="text-lg font-medium">Nombres</h3>
-                            <p>{profileData?.nombre || 'No disponible'}</p>
+                            <h3 className="text-lg font-medium">Nombre</h3>
+                            <p>{profileData?.nombre || userData?.nombre || 'No disponible'}</p>  
                         </div>
                         <div className="profile-item">
-                            <h3 className="text-lg font-medium">Apellidos</h3>
-                            <p>{profileData?.apellido || 'No disponible'}</p>
-                        </div>
-                        <div className="profile-item">
-                            <h3 className="text-lg font-medium">Cédula</h3>
-                            <p>{profileData?.cedula || 'No disponible'}</p>
+                            <h3 className="text-lg font-medium">Nombre de usuario</h3>
+                            <p>{profileData?.usuario || userData?.usuario || 'No disponible'}</p>
                         </div>
                         <div className="profile-item">
                             <h3 className="text-lg font-medium">Email</h3>
                             <p>{profileData?.email || 'No disponible'}</p>
                         </div>
                         <div className="profile-item">
-                            <h3 className="text-lg font-medium">Nombre de usuario</h3>
-                            <p>{profileData?.usuario || 'No disponible'}</p>
-                        </div>
-                        <div className="profile-item">
-                            <h3 className="text-lg font-medium">Teléfono</h3>
-                            <p>{profileData?.telefono || 'No disponible'}</p>
-                        </div>
-                        <div className="profile-item">
-                            <h3 className="text-lg font-medium">Dirección</h3>
-                            <p>{profileData?.direccion || 'No disponible'}</p>
+                            <h3 className="text-lg font-medium">Rol</h3>
+                            <p>{profileData?.rol || userData?.rol || 'No disponible'}</p> 
                         </div>
                     </div>
                 </Card>

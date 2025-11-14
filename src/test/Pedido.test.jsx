@@ -17,31 +17,37 @@ describe('Pedido Component', () => {
   });
 
   test('fetches and displays orders when userData.id is present', async () => {
-    const mockOrders = [
+    const mockPrestamos = [
       {
         id: 1,
-        fecha: '2023-09-29',
-        usuario: { nombre: 'Juan', apellido: 'Pérez' },
-        detalles: [
-          { id: 1, nombreProducto: 'Producto 1', cantidad: 2, precio: 10 },
-          { id: 2, nombreProducto: 'Producto 2', cantidad: 1, precio: 20 },
+        fechaSolicitud: '2023-09-29',
+        usuario: { nombre: 'Juan' },
+        estado: 'Pendiente',
+        detallesPrestamo: [
+          { id: 1, libro: { titulo: 'Libro 1', autor: 'Autor 1' }, cantidad: 2 },
+          { id: 2, libro: { titulo: 'Libro 2', autor: 'Autor 2' }, cantidad: 1 },
         ],
       },
     ];
-    apiFetch.mockResolvedValueOnce(mockOrders);
+    const mockTicket = { codigo: 'TICKET123' };
+    apiFetch.mockResolvedValueOnce(mockPrestamos);
+    apiFetch.mockResolvedValueOnce(mockTicket);
 
     render(<Pedido userData={{ id: 1 }} />);
 
-    const idElem = await screen.findByText('ID Pedido: 1');
+    const idElem = await screen.findByText('ID Préstamo: 1');
     expect(idElem).toBeInTheDocument();
 
     const nombreElem = await screen.findByText(/Juan/);
     expect(nombreElem).toBeInTheDocument();
 
-    const apellidoElem = await screen.findByText(/Pérez/);
-    expect(apellidoElem).toBeInTheDocument();
+    const estadoElem = await screen.findByText('Estado: Pendiente');
+    expect(estadoElem).toBeInTheDocument();
 
-    const totalElem = await screen.findByText('Total: 30 USD');
+    const ticketElem = await screen.findByText('Ticket: TICKET123');
+    expect(ticketElem).toBeInTheDocument();
+
+    const totalElem = await screen.findByText('Total libros: 3');
     expect(totalElem).toBeInTheDocument();
   });
 
@@ -57,50 +63,56 @@ describe('Pedido Component', () => {
     render(<Pedido userData={{ id: 1 }} />);
 
     await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith('Error fetching orders:', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith('Error fetching loans:', expect.any(Error));
     });
 
     consoleSpy.mockRestore();
   });
 
   test('displays multiple orders', async () => {
-    const mockOrders = [
-      {
-        id: 1,
-        fecha: '2023-09-29',
-        usuario: { nombre: 'Juan', apellido: 'Pérez' },
-        detalles: [
-          { id: 1, nombreProducto: 'Producto 1', cantidad: 1, precio: 10 },
-        ],
-      },
-      {
-        id: 2,
-        fecha: '2023-09-30',
-        usuario: { nombre: 'Ana', apellido: 'Gómez' },
-        detalles: [
-          { id: 3, nombreProducto: 'Producto 3', cantidad: 1, precio: 15 },
-        ],
-      },
-    ];
-    apiFetch.mockResolvedValueOnce(mockOrders);
+  const mockPrestamos = [
+    {
+      id: 1,
+      fechaSolicitud: '2023-09-29',
+      usuario: { nombre: 'Juan' },
+      estado: 'Aprobado',
+      detallesPrestamo: [
+        { id: 1, libro: { titulo: 'Libro 1', autor: 'Autor 1' }, cantidad: 1 },
+      ],
+    },
+    {
+      id: 2,
+      fechaSolicitud: '2023-09-30',
+      usuario: { nombre: 'Ana' },
+      estado: 'Rechazado',
+      detallesPrestamo: [
+        { id: 3, libro: { titulo: 'Libro 3', autor: 'Autor 3' }, cantidad: 1 },
+      ],
+    },
+  ];
 
-    render(<Pedido userData={{ id: 1 }} />);
+  const mockTicket1 = { codigo: 'TICKET1' };
+  const mockTicket2 = { codigo: 'TICKET2' };
+  apiFetch.mockResolvedValueOnce(mockPrestamos);
+  apiFetch.mockResolvedValueOnce(mockTicket1);
+  apiFetch.mockResolvedValueOnce(mockTicket2);
 
-    const idElem1 = await screen.findByText('ID Pedido: 1');
-    const idElem2 = await screen.findByText('ID Pedido: 2');
-    expect(idElem1).toBeInTheDocument();
-    expect(idElem2).toBeInTheDocument();
+  render(<Pedido userData={{ id: 1 }} />);
 
-    const nombreElem1 = await screen.findByText(/Juan/);
-    const nombreElem2 = await screen.findByText(/Ana/);
-    expect(nombreElem1).toBeInTheDocument();
-    expect(nombreElem2).toBeInTheDocument();
+  const idElem1 = await screen.findByText('ID Préstamo: 1');
+  const idElem2 = await screen.findByText('ID Préstamo: 2');
+  expect(idElem1).toBeInTheDocument();
+  expect(idElem2).toBeInTheDocument();
 
-    const totalElem1 = await screen.findByText('Total: 10 USD');
-    const totalElem2 = await screen.findByText('Total: 15 USD');
-    expect(totalElem1).toBeInTheDocument();
-    expect(totalElem2).toBeInTheDocument();
-  });
+  const nombreElem1 = await screen.findByText(/Juan/);
+  const nombreElem2 = await screen.findByText(/Ana/);
+  expect(nombreElem1).toBeInTheDocument();
+  expect(nombreElem2).toBeInTheDocument();
+
+  const totalElems = await screen.findAllByText('Total libros: 1');
+  expect(totalElems).toHaveLength(2);
+});
+
 
   test('displays empty list when no orders', async () => {
     apiFetch.mockResolvedValueOnce([]);
@@ -108,28 +120,31 @@ describe('Pedido Component', () => {
     render(<Pedido userData={{ id: 1 }} />);
 
     await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledWith('/historial/all');
+      expect(apiFetch).toHaveBeenCalledWith('/api/prestamos/all');
     });
 
-    expect(screen.queryByText('ID Pedido:')).not.toBeInTheDocument();
+    expect(screen.queryByText('ID Préstamo:')).not.toBeInTheDocument();
   });
 
   test('displays product details correctly', async () => {
-    const mockOrders = [
+    const mockPrestamos = [
       {
         id: 1,
-        fecha: '2023-09-29',
-        usuario: { nombre: 'Juan', apellido: 'Pérez' },
-        detalles: [
-          { id: 1, nombreProducto: 'Producto 1', cantidad: 2, precio: 20 },
+        fechaSolicitud: '2023-09-29',
+        usuario: { nombre: 'Juan' },
+        estado: 'Pendiente',
+        detallesPrestamo: [
+          { id: 1, libro: { titulo: 'Libro 1', autor: 'Autor 1' }, cantidad: 2 },
         ],
       },
     ];
-    apiFetch.mockResolvedValueOnce(mockOrders);
+    const mockTicket = { codigo: 'TICKET123' };
+    apiFetch.mockResolvedValueOnce(mockPrestamos);
+    apiFetch.mockResolvedValueOnce(mockTicket);
 
     render(<Pedido userData={{ id: 1 }} />);
 
-    const detailElem = await screen.findByText('Producto 1 x2 - 20 USD');
+    const detailElem = await screen.findByText('Libro 1 - Autor: Autor 1 x2');
     expect(detailElem).toBeInTheDocument();
   });
 });

@@ -1,32 +1,40 @@
 
+function buildUrl(path) {
+  return `${path.startsWith('/') ? '' : '/'}${path}`;
+}
+
 export async function apiFetch(path, options = {}) {
-  const token = sessionStorage.getItem('auth_token'); 
-  const headers = {
-    Accept: 'application/json',
-    ...(options.body && !(options.headers && options.headers['Content-Type'])
-      ? { 'Content-Type': 'application/json' }
-      : {}),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(options.headers || {})
-  };
+  const token = sessionStorage.getItem('auth_token');
 
-  console.log('[apiFetch] URL:', `${path}`);
-  console.log('[apiFetch] Request headers:', headers);
+  const headers = new Headers(options.headers || {});
+  const hasBody = options.body !== undefined && !(options.body instanceof FormData);
 
-  const resp = await fetch(`${path}`, {
-    ...options,
-    headers
-  });
+  if (hasBody && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+  if (token && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  const resp = await fetch(buildUrl(path), { ...options, headers });
+
+  if (!resp.ok) {
+    const errBody = await resp.text();
+    let parsed;
+    try {
+      parsed = JSON.parse(errBody);
+    } catch {
+      parsed = errBody;
+    }
+    const err = new Error(parsed?.message || resp.statusText);
+    err.status = resp.status;
+    err.body = parsed;
+    throw err;
+  }
 
   const ct = resp.headers.get('content-type') || '';
-  const raw = await resp.text();
-  let data = null;
-  if (ct.includes('application/json') && raw) {
-    try { data = JSON.parse(raw); } catch {}
+  if (ct.includes('application/json')) {
+    return await resp.json();
   }
-  if (!resp.ok) {
-    console.error('[apiFetch] Response status:', resp.status, 'Body snippet:', raw.slice(0,150));
-    throw new Error((data && (data.message || data.error)) || raw || `HTTP ${resp.status}`);
-  }
-  return data;
+  return await resp.text();
 }

@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useRef, useState, useEffect } from 'react';
 import Navbar from './Navbar'; 
-import { apiFetch } from '../lib/api';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -10,23 +9,13 @@ export default function Layout({ children, onLogout, cartItemsCount, userData })
     const userMenu = useRef(null);
     const navigate = useNavigate();
     const [admin, setAdmin] = useState(false);
-    console.log('UserData in Layout:', userData);
 
     useEffect(() => {
-        if (userData?.admin != null) {
-          setAdmin(!!userData.admin);
-          return;
-        }
-        (async () => {
-          if (!userData?.id) return;
-          try {
-            const isAdmin = await apiFetch(`/api/usuarios/${userData.id}/admin`);
-            setAdmin(!!isAdmin);
-          } catch (error) {
-            console.error('Error verificando si el usuario es admin:', error);
+        if (userData?.rol === 'ADMIN') {
+            setAdmin(true);
+        } else {
             setAdmin(false);
-          }
-        })();
+        }
     }, [userData]);
 
     const userMenuItems = [
@@ -38,7 +27,7 @@ export default function Layout({ children, onLogout, cartItemsCount, userData })
         
         ...(admin ? [
             {
-                label: 'Agregar/Editar productos',
+                label: 'Agregar/Editar libros',  
                 icon: 'pi pi-cog',
                 command: () => navigate('/admin'),
             },

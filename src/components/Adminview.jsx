@@ -6,12 +6,14 @@ import Addproduct from './Addproduct';
 import Pedido from './Pedido';
 import Deleteproduct from './Deleteproduct';
 import Updateproduct from './Updateproduct';
+import UpdateStatus from './UpdateStatus';
 
 export default function AdminMenu({ userData }) {
     const [displayAddDialog, setDisplayAddDialog] = useState(false);
     const [displayUpdateDialog, setDisplayUpdateDialog] = useState(false);
     const [displayDeleteDialog, setDisplayDeleteDialog] = useState(false);
     const [displayOrdersDialog, setDisplayOrdersDialog] = useState(false);
+    const [displayUpdateStatusDialog, setDisplayUpdateStatusDialog] = useState(false);
     const toast = useRef(null);
 
     const openDialog = (dialogType) => {
@@ -28,6 +30,9 @@ export default function AdminMenu({ userData }) {
             case 'orders':
                 setDisplayOrdersDialog(true);
                 break;
+            case 'updateStatus':
+                setDisplayUpdateStatusDialog(true);
+                break;
             default:
                 break;
         }
@@ -38,6 +43,7 @@ export default function AdminMenu({ userData }) {
         setDisplayUpdateDialog(false);
         setDisplayDeleteDialog(false);
         setDisplayOrdersDialog(false);
+        setDisplayUpdateStatusDialog(false);
     };
 
     const items = [
@@ -61,6 +67,11 @@ export default function AdminMenu({ userData }) {
             icon: 'pi pi-list',
             command: () => openDialog('orders'),
         },
+        {
+            label: 'Actualizar estado de préstamos',
+            icon: 'pi pi-refresh',
+            command: () => openDialog('updateStatus'),
+        }
     ];
 
     return (
@@ -71,7 +82,7 @@ export default function AdminMenu({ userData }) {
 
             {/* Diálogo de Agregar Producto */}
             <Dialog
-                header="Agregar producto"
+                header="Agregar libro"
                 visible={displayAddDialog}
                 onHide={closeDialog}
                 draggable={false}
@@ -98,10 +109,9 @@ export default function AdminMenu({ userData }) {
             >
                 <Updateproduct userId={userData.id} toast={toast} onClose={closeDialog} />
             </Dialog>
-
-            {/* Diálogo de Eliminar Producto */}
+            {/* Diálogo de Eliminar Libro */}
             <Dialog
-                header="Eliminar producto"
+                header="Eliminar libro"
                 visible={displayDeleteDialog}
                 onHide={closeDialog}
                 draggable={false}
@@ -116,7 +126,7 @@ export default function AdminMenu({ userData }) {
 
             {/* Diálogo de Pedidos */}
             <Dialog
-                header="Pedidos"
+                header="Préstamos"
                 visible={displayOrdersDialog}
                 onHide={closeDialog}
                 draggable={false}
@@ -127,6 +137,20 @@ export default function AdminMenu({ userData }) {
                 className="p-fluid"
             >
                 <Pedido userData={userData} />
+            </Dialog>
+            {/* Diálogo de Actualizar Estado de Préstamos */}
+            <Dialog
+                header="Actualizar estado de préstamos"
+                visible={displayUpdateStatusDialog}
+                onHide={closeDialog}
+                draggable={false}
+                style={{
+                    width: '100%',
+                    maxWidth: '90vw',  // El ancho máximo en pantallas pequeñas
+                }}
+                className="p-fluid"
+            >
+                <UpdateStatus userData={userData} toast={toast} onClose={closeDialog} />
             </Dialog>
         </div>
     );

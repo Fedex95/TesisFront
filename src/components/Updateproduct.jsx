@@ -5,91 +5,88 @@ import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import { apiFetch } from '../lib/api';
 
-export default function UpdateProducto({ userId, toast, onClose }) {
-    const [productos, setProductos] = useState([]); 
-    const [selectedProducto, setSelectedProducto] = useState(null); 
-    const [productData, setProductData] = useState({
-        nombre: '',
+export default function UpdateLibro({ toast, onClose }) {  
+    const [libros, setLibros] = useState([]);  
+    const [selectedLibro, setSelectedLibro] = useState(null); 
+    const [libroData, setLibroData] = useState({
+        titulo: '',  
+        autor: '',  
         descripcion: '',
-        precio: null,
-        imagenURL: '',
+        isbn: '',  
+        imagenUrl: '',  
         categoria: '',
+        copiasDisponibles: null,  
     });
 
-    const categorias = [
-        { label: 'Mouse', value: 'Mouse' },
-        { label: 'Teclado', value: 'Teclado' },
-        { label: 'Case', value: 'Case' },
-        { label: 'Procesador', value: 'Procesador' },
-        { label: 'Tarjeta Gráfica', value: 'TarjetaGrafica' },
-        { label: 'Memoria RAM', value: 'MemoriaRAM' },
-        { label: 'Memoria ROM', value: 'MemoriaROM' },
-        { label: 'Placa Madre', value: 'PlacaMadre' },
-        { label: 'Accesorios', value: 'Accesorios' },
-        { label: 'Fuente de Poder', value: 'FuentePoder' },
-        { label: 'Ventilador', value: 'Ventilador' },
-        { label: 'Monitores', value: 'Monitores' }
-    ]
+    const categorias = [  
+        { label: 'Ficción', value: 'Ficción' },
+        { label: 'No Ficción', value: 'NoFicción' },
+        { label: 'Ciencia', value: 'Ciencia' },
+        { label: 'Historia', value: 'Historia' },
+        { label: 'Biografía', value: 'Biografía' },
+    ];
 
      useEffect(() => {
-            const fetchProductos = async () => {
+            const fetchLibros = async () => {  
                 try {
-                    const data = await apiFetch('/api/producto/find/all'); 
-                    setProductos(data);
+                    const data = await apiFetch('/api/libros');  
+                    setLibros(data);
                 } catch (error) {
                     console.error('Error:', error);
                     toast.current.show({
                         severity: 'error',
                         summary: 'Error',
-                        detail: 'No se pudieron cargar los productos.',
+                        detail: 'No se pudieron cargar los libros.',
                         life: 3000,
                     });
                 }
             };
-            fetchProductos();
+            fetchLibros();
         }, [toast]);
     
 
-    const handleProductSelect = (productoId) => {
-        const selected = productos.find((producto) => producto.id === productoId);
+    const handleLibroSelect = (libroId) => {  
+        const selected = libros.find((libro) => libro.id === libroId); 
         if (selected) {
-            setSelectedProducto(selected.id);
-            setProductData({
-                nombre: selected.nombre,
+            setSelectedLibro(selected.id);
+            setLibroData({ 
+                titulo: selected.titulo,  
+                autor: selected.autor,  
                 descripcion: selected.descripcion,
-                precio: selected.precio,
-                imagenURL: selected.imagenURL,
+                isbn: selected.isbn,  
+                imagenUrl: selected.imagenUrl,  
                 categoria: selected.categoria,
+                copiasDisponibles: selected.copiasDisponibles,  
             });
         }
     };
 
     const handleChange = (e, field) => {
         const value = e.target ? e.target.value : e.value;
-        setProductData({ ...productData, [field]: value });
+        setLibroData({ ...libroData, [field]: value });  
     };
 
     const handleUpdate = async () => {
-        if (!selectedProducto) {
+        if (!selectedLibro) {
             toast.current.show({
                 severity: 'warn',
                 summary: 'Advertencia',
-                detail: 'Por favor, selecciona un producto para actualizar.',
+                detail: 'Por favor, selecciona un libro para actualizar.',
                 life: 3000,
             });
             return;
         }
 
         try {
-            await apiFetch(`/api/producto/edit/${selectedProducto}`, { 
+            await apiFetch(`/api/libros/${selectedLibro}`, { 
                 method: 'PUT',
-                body: JSON.stringify(productData),
+                body: JSON.stringify(libroData),  
             });
 
             toast.current.show({
                 severity: 'success',
                 summary: 'Éxito',
-                detail: `El producto con ID ${selectedProducto} fue actualizado correctamente.`,
+                detail: `El libro con ID ${selectedLibro} fue actualizado correctamente.`,
                 life: 3000,
             });
             onClose();
@@ -98,7 +95,7 @@ export default function UpdateProducto({ userId, toast, onClose }) {
             toast.current.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'No se pudo actualizar el producto.',
+                detail: 'No se pudo actualizar el libro.',
                 life: 3000,
             });
         }
@@ -107,55 +104,61 @@ export default function UpdateProducto({ userId, toast, onClose }) {
     return (
         <div>
             <div className="p-field">
-                <label htmlFor="producto" className="p-mb-2">Seleccionar producto</label>
+                <label htmlFor="libro" className="p-mb-2">Seleccionar libro</label>  
                 <Dropdown
-                    id="producto"
-                    value={selectedProducto}
-                    options={productos.map((producto) => ({ label: producto.nombre, value: producto.id }))}
-                    onChange={(e) => handleProductSelect(e.value)}
+                    id="libro"
+                    value={selectedLibro}
+                    options={libros.map((libro) => ({ label: libro.titulo, value: libro.id }))}  
+                    onChange={(e) => handleLibroSelect(e.value)}  
                     className="p-mb-3"
-                    aria-label="Seleccionar producto"
+                    aria-label="Seleccionar libro"
                 />
             </div>
 
-            {selectedProducto && (
+            {selectedLibro && (
                 <>
                     <div className="p-field">
-                        <label htmlFor="nombre">Nombre</label>
+                        <label htmlFor="titulo">Título</label>  
                         <InputText
-                            id="nombre"
-                            value={productData.nombre}
-                            onChange={(e) => handleChange(e, 'nombre')}
-                            aria-label="Nombre"
+                            id="titulo"
+                            value={libroData.titulo} 
+                            onChange={(e) => handleChange(e, 'titulo')}  
+                            aria-label="Título"
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="autor">Autor</label>  
+                        <InputText
+                            id="autor"
+                            value={libroData.autor}  
+                            onChange={(e) => handleChange(e, 'autor')} 
+                            aria-label="Autor"
                         />
                     </div>
                     <div className="p-field">
                         <label htmlFor="descripcion">Descripción</label>
                         <InputText
                             id="descripcion"
-                            value={productData.descripcion}
+                            value={libroData.descripcion}
                             onChange={(e) => handleChange(e, 'descripcion')}
                             aria-label="Descripción"
                         />
                     </div>
                     <div className="p-field">
-                        <label htmlFor="precio">Precio</label>
-                        <InputNumber
-                            id="precio"
-                            value={productData.precio}
-                            onValueChange={(e) => handleChange(e, 'precio')}
-                            mode="currency"
-                            currency="USD"
-                            locale="es-US"
-                            aria-label="Precio"
+                        <label htmlFor="isbn">ISBN</label>  
+                        <InputText
+                            id="isbn"
+                            value={libroData.isbn}  
+                            onChange={(e) => handleChange(e, 'isbn')}  
+                            aria-label="ISBN"
                         />
                     </div>
                     <div className="p-field">
-                        <label htmlFor="imagenURL">Imagen URL</label>
+                        <label htmlFor="imagenUrl">Imagen URL</label>  
                         <InputText
-                            id="imagenURL"
-                            value={productData.imagenURL}
-                            onChange={(e) => handleChange(e, 'imagenURL')}
+                            id="imagenUrl"
+                            value={libroData.imagenUrl}  
+                            onChange={(e) => handleChange(e, 'imagenUrl')}  
                             aria-label="Imagen URL"
                         />
                     </div>
@@ -163,10 +166,20 @@ export default function UpdateProducto({ userId, toast, onClose }) {
                         <label htmlFor="categoria">Categoría</label>
                         <Dropdown
                             id="categoria"
-                            value={productData.categoria}
+                            value={libroData.categoria}
                             options={categorias}
                             onChange={(e) => handleChange(e, 'categoria')}
                             aria-label="Categoría"
+                        />
+                    </div>
+                    <div className="p-field">
+                        <label htmlFor="copiasDisponibles">Copias Disponibles</label>  
+                        <InputNumber
+                            id="copiasDisponibles"
+                            value={libroData.copiasDisponibles}  
+                            onValueChange={(e) => handleChange(e, 'copiasDisponibles')}  
+                            min={0}
+                            aria-label="Copias Disponibles"
                         />
                     </div>
                     <Button label="Actualizar" icon="pi pi-check" onClick={handleUpdate} className="p-button-success p-mt-3" />

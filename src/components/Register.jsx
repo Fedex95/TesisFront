@@ -10,37 +10,29 @@ function Register() {
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
-    usuario: '',
     cedula: '',
+    usuario: '',
     email: '',
-    pass: '',
     telefono: '',
-    direccion: '',
-    nombreTarjeta: '',
-    numeroTarjeta: '',
-    fechaValidez: '',
-    cvv: '',
-    rol: ''
+    pass: '',
   });
   const toast = useRef(null);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { nombre, apellido, usuario, cedula, email, pass, telefono, direccion, nombreTarjeta, numeroTarjeta, fechaValidez, cvv } = formData;
+    const { nombre, apellido, cedula, usuario, email, telefono, pass } = formData;
 
-    if (!nombre || !apellido || !usuario || !cedula || !email || !pass
-      || !cedula || !email || !cvv || !direccion || !nombreTarjeta || !numeroTarjeta || !fechaValidez
-    ) {
+    if (!nombre || !apellido || !cedula || !usuario || !email || !telefono || !pass) {
       toast.current.show({
         severity: 'warn',
         detail: 'Completa todos los campos obligatorios',
@@ -49,23 +41,81 @@ function Register() {
       return;
     }
 
+    // Validations
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    if (!nameRegex.test(nombre)) {
+      toast.current.show({
+        severity: 'warn',
+        summary: 'Advertencia',
+        detail: 'El nombre solo puede contener letras',
+        life: 3000,
+      });
+      return;
+    }
+    if (!nameRegex.test(apellido)) {
+      toast.current.show({
+        severity: 'warn',
+        summary: 'Advertencia',
+        detail: 'El apellido solo puede contener letras',
+        life: 3000,
+      });
+      return;
+    }
+
+    const numberRegex = /^[0-9]+$/;
+    if (!numberRegex.test(cedula)) {
+      toast.current.show({
+        severity: 'warn',
+        summary: 'Advertencia',
+        detail: 'La cédula solo puede contener números',
+        life: 3000,
+      });
+      return;
+    }
+    if (!numberRegex.test(telefono)) {
+      toast.current.show({
+        severity: 'warn',
+        summary: 'Advertencia',
+        detail: 'El teléfono solo puede contener números',
+        life: 3000,
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.current.show({
+        severity: 'warn',
+        summary: 'Advertencia',
+        detail: 'Por favor ingrese un correo electrónico válido',
+        life: 3000,
+      });
+      return;
+    }
+
+    const passRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[a-zA-Z0-9]).{8,}$/;
+    if (!passRegex.test(pass)) {
+      toast.current.show({
+        severity: 'warn',
+        summary: 'Advertencia',
+        detail: 'La contraseña debe tener al menos 8 caracteres, una mayúscula y un carácter especial',
+        life: 3000,
+      });
+      return;
+    }
+
     const userData = {
-      usuario: usuario,
+      nombre: nombre.trim(),
+      apellido: apellido.trim(),
+      cedula: cedula.trim(),
+      usuario: usuario.trim(),
+      email: email.trim().toLowerCase(),
+      telefono: telefono.trim(),
       pass: pass,
-      nombre: nombre,
-      apellido: apellido,
-      cedula: cedula,
-      email: email,
-      telefono: telefono,
-      direccion: direccion,
-      numeroTarjeta: numeroTarjeta,
-      nombreTarjeta: nombreTarjeta,
-      fechaValidez: fechaValidez,
-      cvv: cvv,
     };
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_URL_BACKEND}/auth/register`, { 
+      const response = await fetch(`${process.env.REACT_APP_URL_BACKEND}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,10 +159,10 @@ function Register() {
       </div>
       <div className="form-side">
         <form onSubmit={handleSubmit}>
-          <h1>Ingrese sus datos personales</h1>
+          <h1>Regístrate en la Biblioteca</h1>  
           <div className="form-group grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="nombre">Nombres</label>
+              <label htmlFor="nombre">Nombre</label>
               <InputText
                 id="nombre"
                 name="nombre"
@@ -122,18 +172,15 @@ function Register() {
               />
             </div>
             <div>
-              <label htmlFor="apellido">Apellidos</label>
+              <label htmlFor="apellido">Apellido</label>
               <InputText
                 id="apellido"
                 name="apellido"
                 value={formData.apellido}
                 onChange={handleChange}
-                className='register-w-full'
+                className="register-w-full"
               />
             </div>
-          </div>
-
-          <div className="form-group grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label htmlFor="cedula">Cédula</label>
               <InputText
@@ -145,24 +192,11 @@ function Register() {
               />
             </div>
             <div>
-              <label htmlFor="telefono">Teléfono</label>
+              <label htmlFor="usuario">Nombre de usuario</label>
               <InputText
-                id="telefono"
-                name="telefono"
-                value={formData.telefono}
-                onChange={handleChange}
-                className="register-w-full"
-              />
-            </div>
-          </div>
-
-          <div className="form-group grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="direccion">Dirección</label>
-              <InputText
-                id="direccion"
-                name="direccion"
-                value={formData.direccion}
+                id="usuario"
+                name="usuario"
+                value={formData.usuario}
                 onChange={handleChange}
                 className="register-w-full"
               />
@@ -179,20 +213,17 @@ function Register() {
                 className="register-w-full"
               />
             </div>
-          </div>
-
-          <div className="form-group grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="usuario">Nombre de usuario</label>
+              <label htmlFor="telefono">Teléfono</label>
               <InputText
-                id="usuario"
-                name="usuario"
-                value={formData.usuario}
+                id="telefono"
+                name="telefono"
+                value={formData.telefono}
                 onChange={handleChange}
                 className="register-w-full"
               />
             </div>
-            <div>
+            <div className="md:col-span-2">
               <label htmlFor="pass">Contraseña</label>
               <Password
                 inputId="pass"
@@ -200,55 +231,6 @@ function Register() {
                 value={formData.pass}
                 onChange={handleChange}
                 className="w-full-pass"
-              />
-            </div>
-          </div>
-
-          <h1>Ingrese un método de pago</h1>
-          <div className="form-group grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="nombreTarjeta">Titular de la tarjeta</label>
-              <InputText
-                id="nombreTarjeta"
-                name="nombreTarjeta"
-                value={formData.nombreTarjeta}
-                onChange={handleChange}
-                className="register-w-full"
-              />
-            </div>
-            <div>
-              <label htmlFor="numeroTarjeta">Dígitos</label>
-              <InputText
-                id="numeroTarjeta"
-                name="numeroTarjeta"
-                value={formData.numeroTarjeta}
-                onChange={handleChange}
-                className="register-w-full"
-              />
-            </div>
-          </div>
-
-          <div className="form-group grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="fechaValidez">Fecha de validación</label>
-              <InputText
-                id="fechaValidez"
-                name="fechaValidez"
-                value={formData.fechaValidez}
-                placeholder="15/21"
-                onChange={handleChange}
-                className="register-w-full"
-              />
-            </div>
-            <div>
-              <label htmlFor="cvv">CVV</label>
-              <InputText
-                id="cvv"
-                name="cvv"
-                value={formData.cvv}
-                placeholder="Revise al reverso de la tarjeta"
-                onChange={handleChange}
-                className="register-w-full"
               />
             </div>
           </div>

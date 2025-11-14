@@ -32,12 +32,9 @@ describe('Profile Component', () => {
   test('displays user data after successful fetch', async () => {
     const mockProfileData = {
       nombre: 'Juan',
-      apellido: 'Pérez',
-      cedula: '123456789',
-      email: 'juan@example.com',
       usuario: 'juanp',
-      telefono: '123-456-7890',
-      direccion: 'Calle 123',
+      email: 'juan@example.com',
+      rol: 'ADMIN',
     };
     apiFetch.mockResolvedValueOnce(mockProfileData);
 
@@ -45,12 +42,9 @@ describe('Profile Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Juan')).toBeInTheDocument();
-      expect(screen.getByText('Pérez')).toBeInTheDocument();
-      expect(screen.getByText('123456789')).toBeInTheDocument();
-      expect(screen.getByText('juan@example.com')).toBeInTheDocument();
       expect(screen.getByText('juanp')).toBeInTheDocument();
-      expect(screen.getByText('123-456-7890')).toBeInTheDocument();
-      expect(screen.getByText('Calle 123')).toBeInTheDocument();
+      expect(screen.getByText('juan@example.com')).toBeInTheDocument();
+      expect(screen.getByText('ADMIN')).toBeInTheDocument();
     });
   });
 
@@ -60,7 +54,7 @@ describe('Profile Component', () => {
     render(<Profile userData={{ id: 1 }} />);
 
     await waitFor(() => {
-      expect(screen.getAllByText('No disponible')).toHaveLength(7);
+      expect(screen.getAllByText('No disponible')).toHaveLength(4);
     });
   });
 
@@ -80,7 +74,7 @@ describe('Profile Component', () => {
     render(<Profile userData={{ id: 1 }} />);
 
     await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledWith('/usuario/getUsuario/1');
+      expect(apiFetch).toHaveBeenCalledWith('/api/usuario/getUsuario/1');
     });
   });
 
@@ -100,20 +94,17 @@ describe('Profile Component', () => {
     render(<Profile userData={{ id: 1 }} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Nombres')).toBeInTheDocument();
-      expect(screen.getByText('Apellidos')).toBeInTheDocument();
-      expect(screen.getByText('Cédula')).toBeInTheDocument();
-      expect(screen.getByText('Email')).toBeInTheDocument();
+      expect(screen.getByText('Nombre')).toBeInTheDocument();
       expect(screen.getByText('Nombre de usuario')).toBeInTheDocument();
-      expect(screen.getByText('Teléfono')).toBeInTheDocument();
-      expect(screen.getByText('Dirección')).toBeInTheDocument();
+      expect(screen.getByText('Email')).toBeInTheDocument();
+      expect(screen.getByText('Rol')).toBeInTheDocument();
     });
   });
 
   test('handles partial data', async () => {
     const partialData = {
       nombre: 'Juan',
-      apellido: 'Pérez',
+      usuario: 'juanp',
     };
     apiFetch.mockResolvedValueOnce(partialData);
 
@@ -121,8 +112,8 @@ describe('Profile Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Juan')).toBeInTheDocument();
-      expect(screen.getByText('Pérez')).toBeInTheDocument();
-      expect(screen.getAllByText('No disponible')).toHaveLength(5);
+      expect(screen.getByText('juanp')).toBeInTheDocument();
+      expect(screen.getAllByText('No disponible')).toHaveLength(2);
     });
   });
 });

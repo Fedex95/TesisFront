@@ -1,33 +1,33 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import App from './App';
+import App from '../App';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   BrowserRouter: ({ children }) => <div>{children}</div>,
 }));
 
-jest.mock('./components/Login', () => ({ onLogin }) => (
+jest.mock('../components/Login', () => ({ onLogin }) => (
   <div>
     <h1>Iniciar Sesión</h1>
-    <button onClick={() => onLogin({ id: 1, nombre: 'User', admin: false, token: 'token' })}>Login</button>
+    <button onClick={() => onLogin({ id: 1, nombre: 'User', rol: 'USER', token: 'token' })}>Login</button>
   </div>
 ));
 
-jest.mock('./components/Layout', () => ({ children, onLogout }) => (
+jest.mock('../components/Layout', () => ({ children, onLogout }) => (
   <div>
     <div>{children}</div>
     <button onClick={onLogout}>Logout</button>
   </div>
 ));
 
-jest.mock('./components/Home', () => () => <div>Electro Master</div>);
-jest.mock('./components/AdminView', () => () => <div>Agregar</div>);
-jest.mock('./components/Register', () => () => <div>Register</div>);
-jest.mock('./components/Cart', () => () => <div>Cart</div>);
-jest.mock('./components/Pedidos', () => () => <div>Pedidos</div>);
-jest.mock('./components/Producto', () => () => <div>Producto</div>);
-jest.mock('./components/PerfilUsuario', () => () => <div>Perfil</div>);
+jest.mock('../components/Home', () => () => <div>Library Master</div>);
+jest.mock('../components/AdminView', () => () => <div>Agregar</div>);
+jest.mock('../components/Register', () => () => <div>Register</div>);
+jest.mock('../components/Cart', () => () => <div>Cart</div>);
+jest.mock('../components/Pedidos', () => () => <div>Pedidos</div>);
+jest.mock('../components/Producto', () => () => <div>Producto</div>);
+jest.mock('../components/PerfilUsuario', () => () => <div>Perfil</div>);
 
 const renderWithRouter = (ui, { route = '/' } = {}) => {
   return render(
@@ -50,9 +50,9 @@ describe('App Component', () => {
 
   test('renders home page when authenticated', () => {
     sessionStorage.setItem('isAuthenticated', 'true');
-    sessionStorage.setItem('userData', JSON.stringify({ id: 1, nombre: 'User' }));
+    sessionStorage.setItem('userData', JSON.stringify({ id: 1, nombre: 'User', rol: 'USER' }));
     renderWithRouter(<App />, { route: '/' });
-    expect(screen.getByText(/electro master/i)).toBeInTheDocument();
+    expect(screen.getByText(/library master/i)).toBeInTheDocument();
   });
 
   test('handleLogin updates state and sessionStorage', async () => {
@@ -61,7 +61,7 @@ describe('App Component', () => {
     fireEvent.click(loginButton);
     await waitFor(() => {
       expect(sessionStorage.getItem('isAuthenticated')).toBe('true');
-      expect(JSON.parse(sessionStorage.getItem('userData'))).toEqual({ id: 1, nombre: 'User', admin: false, token: 'token' });
+      expect(JSON.parse(sessionStorage.getItem('userData'))).toEqual({ id: 1, nombre: 'User', rol: 'USER', token: 'token' });
       expect(sessionStorage.getItem('admin')).toBe('false');
       expect(sessionStorage.getItem('auth_token')).toBe('token');
     });
@@ -88,7 +88,7 @@ describe('App Component', () => {
 
   test('renders admin view only if admin', () => {
     sessionStorage.setItem('isAuthenticated', 'true');
-    sessionStorage.setItem('userData', JSON.stringify({ id: 1 }));
+    sessionStorage.setItem('userData', JSON.stringify({ id: 1, rol: 'ADMIN' }));
     sessionStorage.setItem('admin', 'true');
     renderWithRouter(<App />, { route: '/admin' });
     expect(screen.getByText(/agregar/i)).toBeInTheDocument();
@@ -129,9 +129,9 @@ describe('App Component', () => {
 
   test('redirects to home for unknown route when authenticated', () => {
     sessionStorage.setItem('isAuthenticated', 'true');
-    sessionStorage.setItem('userData', JSON.stringify({ id: 1 }));
+    sessionStorage.setItem('userData', JSON.stringify({ id: 1, rol: 'USER' }));
     renderWithRouter(<App />, { route: '/unknown' });
-    expect(screen.getByText(/electro master/i)).toBeInTheDocument();
+    expect(screen.getByText(/library master/i)).toBeInTheDocument();
   });
 
   test('redirects to login for unknown route when not authenticated', () => {
@@ -141,7 +141,7 @@ describe('App Component', () => {
 
   test('does not render admin view if not admin', () => {
     sessionStorage.setItem('isAuthenticated', 'true');
-    sessionStorage.setItem('userData', JSON.stringify({ id: 1 }));
+    sessionStorage.setItem('userData', JSON.stringify({ id: 1, rol: 'USER' }));
     sessionStorage.setItem('admin', 'false');
     renderWithRouter(<App />, { route: '/admin' });
     expect(screen.getByRole('heading', { name: /iniciar sesión/i })).toBeInTheDocument();

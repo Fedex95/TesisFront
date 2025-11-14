@@ -5,85 +5,74 @@ import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import { apiFetch } from '../lib/api';
 
-export default function Menu({ userData }) {
-    const [productos, setProductos] = useState([]);
+export default function Producto({ userData }) {  
+    const [libros, setLibros] = useState([]);  
     const [quantities, setQuantities] = useState({});
-    const [selectedProducto, setSelectedProducto] = useState(null);
+    const [selectedLibro, setSelectedLibro] = useState(null);
     const [dialogVisible, setDialogVisible] = useState(false);
     const toast = useRef(null);
 
-    const categories = [
-        { label: 'Mouse', value: 'Mouse' },
-        { label: 'Teclado', value: 'Teclado' },
-        { label: 'Case', value: 'Case' },
-        { label: 'Procesador', value: 'Procesador' },
-        { label: 'Tarjeta Gráfica', value: 'TarjetaGrafica' },
-        { label: 'Memoria RAM', value: 'MemoriaRAM' },
-        { label: 'Memoria ROM', value: 'MemoriaROM' },
-        { label: 'Placa Madre', value: 'PlacaMadre' },
-        { label: 'Accesorios', value: 'Accesorios' },
-        { label: 'Fuente de Poder', value: 'FuentePoder' },
-        { label: 'Ventilador', value: 'Ventilador' },
-        { label: 'Monitores', value: 'Monitores' }
-    ]
+    const categories = [  
+        { label: 'Ficción', value: 'Ficción' },
+        { label: 'No Ficción', value: 'NoFicción' },
+        { label: 'Ciencia', value: 'Ciencia' },
+        { label: 'Historia', value: 'Historia' },
+        { label: 'Biografía', value: 'Biografía' },
+    ];
 
     useEffect(() => {
-        const fetchProductos = async () => {
+        const fetchLibros = async () => {  
             try {
-                const data = await apiFetch(`/api/producto/find/all`);
+                const data = await apiFetch('/api/libros');  
 
                 if (data && data.length > 0) {
                     const initialQuantities = {};
-                    data.forEach(producto => {
-                        initialQuantities[producto.id] = 1;
+                    data.forEach(libro => {  
+                        initialQuantities[libro.id] = 1;
                     });
                     setQuantities(initialQuantities);
-                    setProductos(data);
+                    setLibros(data); 
                 }
             } catch (error) {
                 console.error('Error:', error);
             }
         };
 
-        fetchProductos();
+        fetchLibros();
     }, []);
 
-    const openDialog = (producto) => {
-        setSelectedProducto(producto);
+    const openDialog = (libro) => {  
+        setSelectedLibro(libro);  
         setDialogVisible(true);
     };
 
-    const productsByCategory = productos.reduce((acc, producto) => {
-        const category = producto.categoria;
+    const librosByCategory = libros.reduce((acc, libro) => {  
+        const category = libro.categoria;
         if (!acc[category]) {
             acc[category] = [];
         }
-        acc[category].push(producto);
+        acc[category].push(libro);  
         return acc;
     }, {});
 
-    const handleQuantityChange = (productoId, newQuantity) => {
+    const handleQuantityChange = (libroId, newQuantity) => {  
         setQuantities((prevQuantities) => ({
             ...prevQuantities,
-            [productoId]: Math.max(1, newQuantity),
+            [libroId]: Math.max(1, newQuantity),
         }));
     };
 
-    const addToCart = async (productoId) => {
-        const quantity = quantities[productoId];
-        const productItem = productos.find((producto) => producto.id === productoId);
+    const addToCart = async (libroId) => { 
+        const quantity = quantities[libroId];
+        const libroItem = libros.find((libro) => libro.id === libroId);
 
-        if (!productItem || !quantity) return;
+        if (!libroItem || !quantity) return;
 
         try {
-            const response = await fetch(`/api/cart/agregar`, {
+            const response = await apiFetch('/api/cart/agregar', {  
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({
-                    usuarioId: userData.id,
-                    productoId: productItem.id,
+                    libroId: libroItem.id,  
                     cantidad: quantity,
                 }),
             });
@@ -92,7 +81,7 @@ export default function Menu({ userData }) {
                 toast.current.show({
                     severity: 'success',
                     summary: 'Éxito',
-                    detail: `${productItem.nombre} agregado al carrito`,
+                    detail: `${libroItem.titulo} agregado al carrito`,  
                     life: 3000,
                 });
                 setDialogVisible(false);
@@ -119,10 +108,10 @@ export default function Menu({ userData }) {
         <div className="menu-container">
             <Toast ref={toast} />
 
-            {Object.entries(productsByCategory).map(([category, items], index) => (
+            {Object.entries(librosByCategory).map(([category, items], index) => (  
                 <div key={category} className="category-section">
                     <h2 className="category-title">
-                        {categories[category] || category}
+                        {categories.find(c => c.value === category)?.label || category}
                     </h2>
 
                     {index > 0 && <hr className="category-divider" />}
@@ -134,9 +123,9 @@ export default function Menu({ userData }) {
                         gap: '20px',
                         marginTop: '20px'
                     }}>
-                        {items.map(producto => (
+                        {items.map(libro => (  
                             <Card
-                                key={producto.id}
+                                key={libro.id}
                                 className="menu-card"
                                 style={{
                                     height: '450px',
@@ -146,11 +135,11 @@ export default function Menu({ userData }) {
                                     maxWidth: '300px',
                                     margin: '10px',
                                 }}
-                                onClick={() => openDialog(producto)}
+                                onClick={() => openDialog(libro)}  
                             >
                                 <img
-                                    src={producto.imagenURL}
-                                    alt={producto.nombre}
+                                    src={libro.imagenUrl}  
+                                    alt={libro.titulo} 
                                     className="menu-image"
                                     onError={(e) => e.target.src = 'https://via.placeholder.com/300'}
                                     style={{
@@ -178,7 +167,7 @@ export default function Menu({ userData }) {
                                             fontSize: '16px'
                                         }}
                                     >
-                                        {producto.nombre}
+                                        {libro.titulo}  
                                     </h3>
                                     <p
                                         className="menu-description"
@@ -193,7 +182,7 @@ export default function Menu({ userData }) {
                                             WebkitLineClamp: 3,
                                         }}
                                     >
-                                        {producto.descripcion}
+                                        {libro.descripcion}
                                     </p>
                                     <div
                                         className="menu-details"
@@ -204,13 +193,13 @@ export default function Menu({ userData }) {
                                         }}
                                     >
                                         <span
-                                            className="menu-price"
+                                            className="menu-author"
                                             style={{
-                                                fontSize: '18px',
-                                                fontWeight: 'bold'
+                                                fontSize: '14px',
+                                                color: '#888'
                                             }}
                                         >
-                                            ${producto.precio.toFixed(2)}
+                                            Autor: {libro.autor} 
                                         </span>
                                         <span
                                             className="menu-category"
@@ -219,7 +208,7 @@ export default function Menu({ userData }) {
                                                 color: '#888'
                                             }}
                                         >
-                                            {categories[producto.categoria] || producto.categoria}
+                                            {categories.find(c => c.value === libro.categoria)?.label || libro.categoria}
                                         </span>
                                     </div>
                                 </div>
@@ -230,7 +219,7 @@ export default function Menu({ userData }) {
             ))}
 
             <Dialog
-                header="Detalles del plato"
+                header="Detalles del libro"  
                 visible={dialogVisible}
                 style={{
                     width: '30vw',
@@ -256,8 +245,8 @@ export default function Menu({ userData }) {
                     }}
                 >
                     <img
-                        src={selectedProducto?.imagenURL}
-                        alt={selectedProducto?.nombre}
+                        src={selectedLibro?.imagenUrl}  
+                        alt={selectedLibro?.titulo}  
                         className="menu-image"
                         style={{
                             width: '100%',
@@ -276,7 +265,7 @@ export default function Menu({ userData }) {
                             marginBottom: '8px',
                         }}
                     >
-                        {selectedProducto?.nombre}
+                        {selectedLibro?.titulo}  
                     </h3>
                     <p
                         style={{
@@ -285,17 +274,16 @@ export default function Menu({ userData }) {
                             marginBottom: '12px',
                         }}
                     >
-                        {selectedProducto?.descripcion}
+                        {selectedLibro?.descripcion}
                     </p>
                     <p
                         style={{
-                            fontSize: '18px',
-                            fontWeight: 'bold',
-                            color: '#007BFF',
+                            fontSize: '14px',
+                            color: '#888',
                             marginBottom: '10px',
                         }}
                     >
-                        ${selectedProducto?.precio.toFixed(2)}
+                        Autor: {selectedLibro?.autor}  
                     </p>
                     <p
                         style={{
@@ -305,28 +293,28 @@ export default function Menu({ userData }) {
                             marginBottom: '20px',
                         }}
                     >
-                        {categories[selectedProducto?.categoria]}
+                        {categories.find(c => c.value === selectedLibro?.categoria)?.label || selectedLibro?.categoria}
                     </p>
 
-                    {selectedProducto && (
+                    {selectedLibro && (
                         <div>
                             <Button
                                 icon="pi pi-minus"
                                 onClick={() =>
                                     handleQuantityChange(
-                                        selectedProducto.id,
-                                        quantities[selectedProducto.id] - 1
+                                        selectedLibro.id,  
+                                        quantities[selectedLibro.id] - 1
                                     )
                                 }
                                 style={{ marginRight: '10px' }}
                             />
-                            <span>{quantities[selectedProducto.id]}</span>
+                            <span>{quantities[selectedLibro.id]}</span> 
                             <Button
                                 icon="pi pi-plus"
                                 onClick={() =>
                                     handleQuantityChange(
-                                        selectedProducto.id,
-                                        quantities[selectedProducto.id] + 1
+                                        selectedLibro.id,  
+                                        quantities[selectedLibro.id] + 1
                                     )
                                 }
                                 style={{ marginLeft: '10px' }}
@@ -335,7 +323,7 @@ export default function Menu({ userData }) {
                                 <Button
                                     label="Agregar al carrito"
                                     icon="pi pi-shopping-cart"
-                                    onClick={() => addToCart(selectedProducto.id)}
+                                    onClick={() => addToCart(selectedLibro.id)} 
                                     style={{ width: '100%' }}
                                     className="p-button-success"
                                 />

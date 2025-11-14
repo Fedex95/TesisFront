@@ -25,18 +25,13 @@ describe('Register Component', () => {
   });
 
   const fillForm = () => {
-    fireEvent.change(screen.getByLabelText('Nombres'), { target: { value: 'Juan' } });
-    fireEvent.change(screen.getByLabelText('Apellidos'), { target: { value: 'Pérez' } });
+    fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Juan' } });
+    fireEvent.change(screen.getByLabelText('Apellido'), { target: { value: 'Pérez' } });
     fireEvent.change(screen.getByLabelText('Cédula'), { target: { value: '123456789' } });
-    fireEvent.change(screen.getByLabelText('Teléfono'), { target: { value: '1234567890' } });
-    fireEvent.change(screen.getByLabelText('Dirección'), { target: { value: 'Calle 123' } });
-    fireEvent.change(screen.getByLabelText('Correo'), { target: { value: 'juan@example.com' } });
     fireEvent.change(screen.getByLabelText('Nombre de usuario'), { target: { value: 'juanp' } });
+    fireEvent.change(screen.getByLabelText('Correo'), { target: { value: 'juan@example.com' } });
+    fireEvent.change(screen.getByLabelText('Teléfono'), { target: { value: '1234567890' } });
     fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'password' } });
-    fireEvent.change(screen.getByLabelText('Titular de la tarjeta'), { target: { value: 'Juan Pérez' } });
-    fireEvent.change(screen.getByLabelText('Dígitos'), { target: { value: '1234567890123456' } });
-    fireEvent.change(screen.getByLabelText('Fecha de validación'), { target: { value: '12/25' } });
-    fireEvent.change(screen.getByLabelText('CVV'), { target: { value: '123' } });
   };
 
   test('renders register form', () => {
@@ -45,8 +40,7 @@ describe('Register Component', () => {
         <Register />
       </MemoryRouter>
     );
-    expect(screen.getByText('Ingrese sus datos personales')).toBeInTheDocument();
-    expect(screen.getByText('Ingrese un método de pago')).toBeInTheDocument();
+    expect(screen.getByText('Regístrate en la Biblioteca')).toBeInTheDocument();
     expect(screen.getByText('Registrarse')).toBeInTheDocument();
     expect(screen.getByText('¿Ya tienes una cuenta?')).toBeInTheDocument();
   });
@@ -57,7 +51,7 @@ describe('Register Component', () => {
         <Register />
       </MemoryRouter>
     );
-    const nombreInput = screen.getByLabelText('Nombres');
+    const nombreInput = screen.getByLabelText('Nombre');
     fireEvent.change(nombreInput, { target: { value: 'Juan' } });
     expect(nombreInput).toHaveValue('Juan');
   });
@@ -86,24 +80,19 @@ describe('Register Component', () => {
     const submitButton = screen.getByText('Registrarse');
     fireEvent.click(submitButton);
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith(`${process.env.REACT_APP_URL_BACKEND}/auth/register`, {
+      expect(mockFetch).toHaveBeenCalledWith(`${process.env.REACT_APP_URL_BACKEND}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          usuario: 'juanp',
-          pass: 'password',
           nombre: 'Juan',
           apellido: 'Pérez',
           cedula: '123456789',
+          usuario: 'juanp',
           email: 'juan@example.com',
           telefono: '1234567890',
-          direccion: 'Calle 123',
-          numeroTarjeta: '1234567890123456',
-          nombreTarjeta: 'Juan Pérez',
-          fechaValidez: '12/25',
-          cvv: '123',
+          pass: 'password',
         }),
       });
       expect(screen.getByText('Usuario registrado exitosamente')).toBeInTheDocument();
@@ -158,7 +147,7 @@ describe('Register Component', () => {
         <Register />
       </MemoryRouter>
     );
-    fireEvent.change(screen.getByLabelText('Nombres'), { target: { value: 'Juan' } });
+    fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Juan' } });
     const submitButton = screen.getByText('Registrarse');
     fireEvent.click(submitButton);
     await waitFor(() => {
@@ -183,18 +172,13 @@ describe('Register Component', () => {
         <Register />
       </MemoryRouter>
     );
-    expect(screen.getByLabelText('Nombres')).toBeInTheDocument();
-    expect(screen.getByLabelText('Apellidos')).toBeInTheDocument();
+    expect(screen.getByLabelText('Nombre')).toBeInTheDocument();
+    expect(screen.getByLabelText('Apellido')).toBeInTheDocument();
     expect(screen.getByLabelText('Cédula')).toBeInTheDocument();
-    expect(screen.getByLabelText('Teléfono')).toBeInTheDocument();
-    expect(screen.getByLabelText('Dirección')).toBeInTheDocument();
-    expect(screen.getByLabelText('Correo')).toBeInTheDocument();
     expect(screen.getByLabelText('Nombre de usuario')).toBeInTheDocument();
+    expect(screen.getByLabelText('Correo')).toBeInTheDocument();
+    expect(screen.getByLabelText('Teléfono')).toBeInTheDocument();
     expect(screen.getByLabelText('Contraseña')).toBeInTheDocument();
-    expect(screen.getByLabelText('Titular de la tarjeta')).toBeInTheDocument();
-    expect(screen.getByLabelText('Dígitos')).toBeInTheDocument();
-    expect(screen.getByLabelText('Fecha de validación')).toBeInTheDocument();
-    expect(screen.getByLabelText('CVV')).toBeInTheDocument();
   });
 
   test('handles form data changes', () => {

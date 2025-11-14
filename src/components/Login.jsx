@@ -10,14 +10,16 @@ import { Link } from 'react-router-dom';
 import '../styles/Login.css';
 
 function Login({ onLogin }) {
-    const [usuario, setUsuario] = useState('');
-    const [pass, setPass] = useState('');
+    const [email, setEmail] = useState('');
+    const [pass, setPass] = useState(''); 
     const toast = useRef(null);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        if (!usuario || !pass) {
+        const trimmedEmail = email.trim().toLowerCase();
+        setEmail(trimmedEmail);
+        if (!trimmedEmail || !pass) {
             toast.current.show({
                 severity: 'warn',
                 summary: 'Advertencia',
@@ -26,10 +28,20 @@ function Login({ onLogin }) {
             });
             return;
         }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(trimmedEmail)) {
+            toast.current.show({
+                severity: 'warn',
+                summary: 'Advertencia',
+                detail: 'Por favor ingrese un correo electrónico válido',
+                life: 3000
+            });
+            return;
+        }
         try {
             const data = await apiFetch('/api/auth/login', {
-              method: 'POST',
-              body: JSON.stringify({ usuario, pass })
+                method: 'POST',
+                body: JSON.stringify({ email: trimmedEmail, pass })
             });
             if (!data?.token) {
                 toast.current.show({
@@ -41,21 +53,20 @@ function Login({ onLogin }) {
                 return;
             }
 
-            // guardar token en sesión
+            // Guardar tokens en sesión
             sessionStorage.setItem('auth_token', data.token);
+            sessionStorage.setItem('refresh_token', data.refreshToken);
             const claims = decodeJwt(data.token);
-            console.log('Claims decodificados:', claims);
             const user = {
-              id: claims?.userId ?? claims?.id,
-              nombre: claims?.nombre || claims?.sub,
-              admin: claims?.rol === 'ADMIN' || claims?.admin === true, 
-              token: data.token
+                id: claims?.userId ?? claims?.id,
+                nombre: claims?.nombre || claims?.sub,
+                rol: claims?.rol,
+                token: data.token,
+                refreshToken: data.refreshToken
             };
 
-            // persistir sesión
             sessionStorage.setItem('isAuthenticated', 'true');
             sessionStorage.setItem('userData', JSON.stringify(user));
-            sessionStorage.setItem('admin', String(user.admin));
 
             onLogin(user);
             toast.current.show({
@@ -64,19 +75,31 @@ function Login({ onLogin }) {
                 detail: 'Inicio de sesión exitoso',
                 life: 3000
             });
-            setUsuario('');
+            setEmail('');
             setPass('');
             navigate('/home');
         } catch (error) {
-            console.error(error);
-            toast.current.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Error de red',
-                life: 3000
-            });
+            console.error('Error:', error);
+            const errorMessage = error.message || 'Error de red';
+            if (error.status === 403) {
+                toast.current.show({
+                    severity: 'warn',
+                    summary: 'Cuenta no verificada',
+                    detail: 'Redirigiendo a verificación.',
+                    life: 3000
+                });
+                navigate('/verify', { state: { email } });
+            } else {
+                toast.current.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: errorMessage,
+                    life: 3000
+                });
+            }
         }
     };
+
 
     return (
         <div className="login-container flex justify-center items-center p-4 min-h-screen">
@@ -85,8 +108,8 @@ function Login({ onLogin }) {
                 {/* Imagen y texto del lado izquierdo */}
                 <div className="login-image-side hidden md:block relative w-full md:w-1/2 bg-blue-600">
                     <div className="overlay absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center text-white">
-                        <h2 className="text-4xl font-bold mb-2">Electro Master</h2>
-                        <p className="text-lg">Los mejores productos electrónicos</p>
+                        <h2 className="text-4xl font-bold mb-2">Biblioteca Digital</h2>
+                        <p className="text-lg">Los mejores libros para leer</p>
                     </div>
                 </div>
 
@@ -98,12 +121,12 @@ function Login({ onLogin }) {
 
                     <form className="login-form w-full" onSubmit={handleLogin}>
                         <div className="form-group mb-4">
-                            <label htmlFor="usuario" className="block text-sm font-medium">Usuario</label>
+                            <label htmlFor="email" className="block text-sm font-medium">Correo</label>
                             <InputText
-                                id="usuario"
-                                value={usuario}
-                                onChange={(e) => setUsuario(e.target.value)}
-                                placeholder="Ingresa tu usuario"
+                                id="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="Ingresa tu correo"
                                 className="w-full p-3 border rounded-lg mt-2"
                             />
                         </div>
@@ -123,7 +146,7 @@ function Login({ onLogin }) {
                         <Button
                             label="Iniciar Sesión"
                             icon="pi pi-sign-in"
-                            disabled={!usuario || !pass}
+                            disabled={!email || !pass}
                             className="w-full p-3 bg-blue-600 text-white rounded-lg mt-4"
                         />
 
@@ -131,6 +154,12 @@ function Login({ onLogin }) {
                             ¿No tienes una cuenta? {' '}
                             <Link to="/register" className="register-link">
                                 Regístrate aquí
+                            </Link>
+                        </div>
+                        <div className="register-prompt text-center mt-4">
+                            ¿No has verificado tu cuenta? {' '}
+                            <Link to="/verify" className="register-link">
+                                Verifica aquí
                             </Link>
                         </div>
                     </form>

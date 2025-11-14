@@ -4,45 +4,45 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { apiFetch } from '../lib/api'; 
 
-export default function DeleteProducto({ userId, toast, onClose }) {
-    const [productos, setProductos] = useState([]); 
+export default function Deleteproduct({ toast, onClose }) { 
+    const [libros, setLibros] = useState([]);  
 
     useEffect(() => {
-        const fetchProductos = async () => {
+        const fetchLibros = async () => { 
             try {
-                const data = await apiFetch('/api/producto/find/all'); 
-                setProductos(data);
+                const data = await apiFetch('/api/libros'); 
+                setLibros(data);
             } catch (error) {
                 console.error('Error:', error);
                 toast.current.show({
                     severity: 'error',
                     summary: 'Error',
-                    detail: 'No se pudieron cargar los productos.',
+                    detail: 'No se pudieron cargar los libros.',
                     life: 3000,
                 });
             }
         };
-        fetchProductos();
+        fetchLibros();
     }, [toast]);
 
-    const handleDelete = async (productoId) => {
+    const handleDelete = async (libroId) => {  
         try {
-            await apiFetch(`/api/producto/delete/${productoId}`, { 
+            await apiFetch(`/api/libros/${libroId}`, {  
                 method: 'DELETE'
             });
             toast.current.show({
                 severity: 'success',
                 summary: 'Éxito',
-                detail: `El producto con ID ${productoId} fue eliminado correctamente.`,
+                detail: `El libro con ID ${libroId} fue eliminado correctamente.`,
                 life: 3000,
             });
-            setProductos(productos.filter((producto) => producto.id !== productoId));
+            setLibros(libros.filter((libro) => libro.id !== libroId));  
         } catch (error) {
             console.error('Error:', error);
             toast.current.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'No se pudo eliminar el producto.',
+                detail: 'No se pudo eliminar el libro.',
                 life: 3000,
             });
         }
@@ -61,11 +61,12 @@ export default function DeleteProducto({ userId, toast, onClose }) {
 
     return (
         <div>
-            <DataTable value={productos} responsiveLayout="scroll">
+            <DataTable value={libros} responsive="scroll">  
                 <Column field="id" header="ID" />
-                <Column field="nombre" header="Nombre" />
-                <Column field="precio" header="Precio" />
+                <Column field="titulo" header="Título" />  
+                <Column field="autor" header="Autor" />  
                 <Column field="categoria" header="Categoría" />
+                <Column field="isbn" header="ISBN" />  
                 <Column body={deleteButtonTemplate} header="Acciones" />
             </DataTable>
             <Button

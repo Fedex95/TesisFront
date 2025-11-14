@@ -13,8 +13,7 @@ function Cart({ userData }) {
 
     const fetchCartItems = useCallback(async () => {
         try {
-            
-            const cartData = await apiFetch('/api/cart/get');
+            const cartData = await apiFetch('/api/cart/get');  
 
             if (cartData && cartData.items) {
                 setCartItems(cartData.items);
@@ -48,7 +47,7 @@ function Cart({ userData }) {
             toast.current.show({
                 severity: 'success',
                 summary: 'Éxito',
-                detail: 'Producto eliminado del carrito',
+                detail: 'Libro eliminado del carrito',
                 life: 3000
             });
 
@@ -59,44 +58,33 @@ function Cart({ userData }) {
             toast.current.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'No se pudo eliminar el producto',
+                detail: 'No se pudo eliminar el libro',
                 life: 3000
             });
         }
     };
 
-    const calculateTotal = () => {
-        if (!cartItems || cartItems.length === 0) return 0;
-
-        return cartItems.reduce((total, item) => {
-            const precio = item.producto?.precio || 0;
-            const cantidad = item.cantidad || 0;
-            return total + (precio * cantidad);
-        }, 0);
-    };
-
-    const handlePayment = async () => {
+    const handleLoanRequest = async () => {
+        const cartData = { items: cartItems }; 
         try {
-            await apiFetch('/api/cart/pagar', {
-                method: 'PUT'
+            await apiFetch('/api/prestamos', {
+                method: 'POST',
+                body: JSON.stringify(cartData),
             });
-
             toast.current.show({
                 severity: 'success',
-                summary: '¡Éxito!',
-                detail: 'Pago procesado correctamente',
-                life: 3000
+                summary: 'Éxito',
+                detail: 'Préstamo solicitado exitosamente',
+                life: 3000,
             });
-
-            fetchCartItems();
-
+            setCartItems([]); 
         } catch (error) {
-            console.error('Error:', error);
+            const message = error.message || 'Error desconocido';
             toast.current.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'No se pudo procesar el pago',
-                life: 3000
+                detail: message,  
+                life: 5000,
             });
         }
     };
@@ -104,7 +92,7 @@ function Cart({ userData }) {
     return (
         <div className="cart-container p-4">
             <Toast ref={toast} />
-            <h1 className="cart-title text-center text-3xl font-semibold mb-6">Carrito</h1>
+            <h1 className="cart-title text-center text-3xl font-semibold mb-6">Carrito de Préstamos</h1>  
 
             {cartItems.length === 0 ? (
                 <Card className="empty-cart p-4">
@@ -126,8 +114,8 @@ function Cart({ userData }) {
                             <Card key={item.id} className="cart-item p-3 flex flex-col justify-between">
                                 <div className="cart-item-content flex flex-col items-start">
                                     <img
-                                        src={item.producto?.imagenURL}
-                                        alt={item.producto?.nombre}
+                                        src={item.libro?.imagenUrl}  
+                                        alt={item.libro?.titulo}  
                                         className="cart-item-image w-72 h-72 object-cover rounded-lg mb-4"
                                         onError={(e) => {
                                             e.target.onerror = null;
@@ -135,10 +123,8 @@ function Cart({ userData }) {
                                         }}
                                     />
                                     <div className="cart-item-details text-left w-full">
-                                        <h3 className="text-lg font-medium">{item.producto?.nombre}</h3>
-                                        <p className="cart-item-price text-xl text-green-600">
-                                            ${item.producto?.precio}
-                                        </p>
+                                        <h3 className="text-lg font-medium">{item.libro?.titulo}</h3>  
+                                        <p className="cart-item-author">Autor: {item.libro?.autor}</p> 
                                     </div>
                                     <div className="cart-item-actions mt-3 flex justify-between w-full">
                                         <span className="cart-item-quantity">
@@ -157,25 +143,16 @@ function Cart({ userData }) {
                     </div>
 
                     <Card className="cart-summary mt-6 p-4">
-                        <h3 className="text-xl font-semibold">Resumen del Pedido</h3>
+                        <h3 className="text-xl font-semibold">Resumen del Préstamo</h3>
                         <div className="cart-summary-content mt-4">
                             <div className="summary-row flex justify-between py-2">
-                                <span>Subtotal: <span>${calculateTotal().toFixed(2)}</span></span>
-                            </div>
-                            <span className='justify-between py-2'> Precio incluye IVA</span>
-                            <div className="summary-row flex justify-between py-2">
-                                <span>Envío:</span>
-                                <span>Gratis</span>
-                            </div>
-                            <div className="summary-total flex justify-between py-3 border-t mt-4">
-                                <span>Total:</span>
-                                <span className="font-semibold">${calculateTotal().toFixed(2)}</span>
+                                <span>Libros solicitados: {cartItems.length}</span>
                             </div>
                             <Button
-                                label="Proceder al pago"
-                                icon="pi pi-shopping-cart"
+                                label="Solicitar Préstamo"  
+                                icon="pi pi-book"  
                                 className="p-button-success p-button-raised mt-4 w-full"
-                                onClick={handlePayment}
+                                onClick={handleLoanRequest}  
                                 disabled={cartItems.length === 0}
                             />
                         </div>

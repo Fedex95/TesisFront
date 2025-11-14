@@ -23,7 +23,7 @@ jest.mock('../components/Navbar', () => ({ userMenuItems, onLogout }) => (
 ));
 
 const mockOnLogout = jest.fn();
-const mockUserData = { id: 1, admin: false };
+const mockUserData = { id: 1, rol: 'USER' };
 const mockChildren = <div>Test Children</div>;
 
 describe('Layout Component', () => {
@@ -80,46 +80,39 @@ describe('Layout Component', () => {
     expect(screen.getByText('Test Children')).toBeInTheDocument();
   });
 
-  test('checks admin status on mount if not in userData', async () => {
-    const userWithoutAdmin = { id: 1 };
+  test('sets admin state based on userData.rol', () => {
+    const adminUser = { id: 1, rol: 'ADMIN' };
     render(
       <MemoryRouter>
-        <Layout onLogout={mockOnLogout} cartItemsCount={0} userData={userWithoutAdmin}>
+        <Layout onLogout={mockOnLogout} cartItemsCount={0} userData={adminUser}>
           {mockChildren}
         </Layout>
       </MemoryRouter>
     );
-    await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledWith('/usuarios/1/admin');
-    });
+    expect(screen.getByText('Agregar/Editar libros')).toBeInTheDocument();
   });
 
-  test('handles admin check error', async () => {
-    apiFetch.mockRejectedValueOnce(new Error('Admin check error'));
-    const userWithoutAdmin = { id: 1 };
+  test('does not set admin if rol is not ADMIN', () => {
     render(
       <MemoryRouter>
-        <Layout onLogout={mockOnLogout} cartItemsCount={0} userData={userWithoutAdmin}>
+        <Layout onLogout={mockOnLogout} cartItemsCount={0} userData={mockUserData}>
           {mockChildren}
         </Layout>
       </MemoryRouter>
     );
-    await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledWith('/usuarios/1/admin');
-    });
-    expect(screen.queryByText('Administrar')).not.toBeInTheDocument();
+    expect(screen.queryByText('Agregar/Editar libros')).not.toBeInTheDocument();
   });
 
-  test('does not check admin if userData.id is missing', () => {
-    const userWithoutId = {};
+  test('does not set admin if userData is missing', () => {
+    const userWithoutRol = { id: 1 };
     render(
       <MemoryRouter>
-        <Layout onLogout={mockOnLogout} cartItemsCount={0} userData={userWithoutId}>
+        <Layout onLogout={mockOnLogout} cartItemsCount={0} userData={userWithoutRol}>
           {mockChildren}
         </Layout>
       </MemoryRouter>
     );
-    expect(apiFetch).not.toHaveBeenCalled();
+    expect(screen.queryByText('Agregar/Editar libros')).not.toBeInTheDocument();
   });
 
   test('passes userMenuItems to Navbar', () => {
@@ -159,7 +152,7 @@ describe('Layout Component', () => {
   });
 
   test('includes admin menu item if admin', () => {
-    const adminUser = { id: 1, admin: true };
+    const adminUser = { id: 1, rol: 'ADMIN' };
     render(
       <MemoryRouter>
         <Layout onLogout={mockOnLogout} cartItemsCount={0} userData={adminUser}>
@@ -167,7 +160,7 @@ describe('Layout Component', () => {
         </Layout>
       </MemoryRouter>
     );
-    expect(screen.getByRole('button', { name: 'Agregar/Editar productos' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Agregar/Editar libros' })).toBeInTheDocument();
   });
 
   test('renders layout container with background', () => {

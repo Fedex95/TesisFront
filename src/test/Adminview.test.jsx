@@ -5,6 +5,7 @@ jest.mock('../components/Addproduct', () => () => <div>Add Product Component</di
 jest.mock('../components/Pedido', () => () => <div>Pedido Component</div>);
 jest.mock('../components/Deleteproduct', () => () => <div>Delete Product Component</div>);
 jest.mock('../components/Updateproduct', () => () => <div>Update Product Component</div>);
+jest.mock('../components/UpdateStatus', () => () => <div>Update Status Component</div>);
 
 beforeAll(() => {
   const helpers = require('jsdom/lib/jsdom/living/helpers/stylesheets');
@@ -18,6 +19,7 @@ describe('AdminMenu Component', () => {
     expect(screen.getByText('Actualizar')).toBeInTheDocument();
     expect(screen.getByText('Eliminar')).toBeInTheDocument();
     expect(screen.getByText('Pedidos')).toBeInTheDocument();
+    expect(screen.getByText('Actualizar estado de préstamos')).toBeInTheDocument();
   });
 
   test('opens add product dialog on menu click', () => {
@@ -39,7 +41,6 @@ describe('AdminMenu Component', () => {
     render(<AdminMenu userData={{ id: 1 }} />);
     const deleteButton = screen.getByText('Eliminar');
     fireEvent.click(deleteButton);
-    expect(screen.getByText('Eliminar producto')).toBeInTheDocument();
     expect(screen.getByText('Delete Product Component')).toBeInTheDocument();
   });
 
@@ -48,6 +49,13 @@ describe('AdminMenu Component', () => {
     const ordersButton = screen.getByText('Pedidos');
     fireEvent.click(ordersButton);
     expect(screen.getByText('Pedido Component')).toBeInTheDocument();
+  });
+
+  test('opens update status dialog on menu click', () => {
+    render(<AdminMenu userData={{ id: 1 }} />);
+    const updateStatusButton = screen.getByText('Actualizar estado de préstamos');
+    fireEvent.click(updateStatusButton);
+    expect(screen.getByText('Update Status Component')).toBeInTheDocument();
   });
 
   test('closes dialog when close button is clicked', () => {
@@ -68,5 +76,6 @@ describe('AdminMenu Component', () => {
     expect(screen.queryByText('Update Product Component')).not.toBeInTheDocument();
     expect(screen.queryByText('Delete Product Component')).not.toBeInTheDocument();
     expect(screen.queryByText('Pedido Component')).not.toBeInTheDocument();
+    expect(screen.queryByText('Update Status Component')).not.toBeInTheDocument();
   });
 });

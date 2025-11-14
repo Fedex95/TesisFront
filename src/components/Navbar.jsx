@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from 'primereact/button';
 import { Badge } from 'primereact/badge';
@@ -8,7 +7,7 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 
 
-function Navbar({ cartItemsCount, handleNavigation, userMenuItems, userMenu, userData }) {
+function Navbar({ cartItemsCount, userMenuItems, userMenu, userData }) {
     return (
 
         <nav
@@ -25,7 +24,7 @@ function Navbar({ cartItemsCount, handleNavigation, userMenuItems, userMenu, use
 
             {/* Contenedor de la marca */}
             <Link to="/home" style={{ fontSize: '1.5rem', color: 'white' }}>
-                Electro Master
+                Library Master
             </Link>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>

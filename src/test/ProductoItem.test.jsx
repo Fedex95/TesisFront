@@ -15,53 +15,53 @@ describe('MenuItem Component', () => {
 
   test('renders item details', () => {
     const item = {
-      image: 'test-image.jpg',
-      name: 'Producto 1',
-      description: 'Descripción del producto',
-      price: 10.99,
+      imagenUrl: 'test-image.jpg',
+      titulo: 'Libro 1',
+      descripcion: 'Descripción del libro',
+      autor: 'Autor 1',
     };
     render(<MenuItem item={item} onAddToCart={mockOnAddToCart} />);
-    expect(screen.getByAltText('Producto 1')).toBeInTheDocument();
-    expect(screen.getByText('Producto 1')).toBeInTheDocument();
-    expect(screen.getByText('Descripción del producto')).toBeInTheDocument();
-    expect(screen.getByText('$10.99')).toBeInTheDocument();
-    expect(screen.getByText('Agregar al carrito')).toBeInTheDocument();
+    expect(screen.getByAltText('Libro 1')).toBeInTheDocument();
+    expect(screen.getByText('Libro 1')).toBeInTheDocument();
+    expect(screen.getByText('Descripción del libro')).toBeInTheDocument();
+    expect(screen.getByText('Autor: Autor 1')).toBeInTheDocument();
+    expect(screen.getByText('Agregar libro al carrito')).toBeInTheDocument();
   });
 
   test('calls onAddToCart when button is clicked', () => {
     const item = {
-      image: 'test-image.jpg',
-      name: 'Producto 1',
-      description: 'Descripción del producto',
-      price: 10.99,
+      imagenUrl: 'test-image.jpg',
+      titulo: 'Libro 1',
+      descripcion: 'Descripción del libro',
+      autor: 'Autor 1',
     };
     render(<MenuItem item={item} onAddToCart={mockOnAddToCart} />);
-    const button = screen.getByText('Agregar al carrito');
+    const button = screen.getByText('Agregar libro al carrito');
     fireEvent.click(button);
     expect(mockOnAddToCart).toHaveBeenCalledWith(item);
   });
 
   test('renders image correctly', () => {
     const item = {
-      image: 'test-image.jpg',
-      name: 'Producto 1',
-      description: 'Descripción del producto',
-      price: 10.99,
+      imagenUrl: 'test-image.jpg',
+      titulo: 'Libro 1',
+      descripcion: 'Descripción del libro',
+      autor: 'Autor 1',
     };
     render(<MenuItem item={item} onAddToCart={mockOnAddToCart} />);
-    const img = screen.getByAltText('Producto 1');
+    const img = screen.getByAltText('Libro 1');
     expect(img).toHaveAttribute('src', 'test-image.jpg');
   });
 
   test('button is clickable', () => {
     const item = {
-      image: 'test-image.jpg',
-      name: 'Producto 1',
-      description: 'Descripción del producto',
-      price: 10.99,
+      imagenUrl: 'test-image.jpg',
+      titulo: 'Libro 1',
+      descripcion: 'Descripción del libro',
+      autor: 'Autor 1',
     };
     render(<MenuItem item={item} onAddToCart={mockOnAddToCart} />);
-    const button = screen.getByText('Agregar al carrito');
+    const button = screen.getByText('Agregar libro al carrito');
     expect(button).toBeInTheDocument();
     fireEvent.click(button);
     expect(mockOnAddToCart).toHaveBeenCalledTimes(1);

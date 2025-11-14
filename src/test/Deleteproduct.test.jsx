@@ -14,21 +14,21 @@ const mockToast = {
 
 const mockOnClose = jest.fn();
 
-const mockProductos = [
-  { id: 1, nombre: 'Producto 1', precio: 100, categoria: 'Mouse' },
-  { id: 2, nombre: 'Producto 2', precio: 200, categoria: 'Teclado' }
+const mockLibros = [
+  { id: 1, titulo: 'Libro 1', autor: 'Autor 1', categoria: 'Ficción', isbn: '1234567890' },
+  { id: 2, titulo: 'Libro 2', autor: 'Autor 2', categoria: 'No Ficción', isbn: '0987654321' }
 ];
 
 describe('DeleteProducto Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    apiFetch.mockResolvedValueOnce(mockProductos);
+    apiFetch.mockResolvedValueOnce(mockLibros);
   });
 
   test('renders data table', async () => {
     render(<DeleteProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
     await waitFor(() => {
-      expect(screen.getByText('Producto 1')).toBeInTheDocument();
+      expect(screen.getByText('Libro 1')).toBeInTheDocument();
     });
   });
 
@@ -40,15 +40,17 @@ describe('DeleteProducto Component', () => {
   test('displays product data', async () => {
     render(<DeleteProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
 
-    const prod1 = await screen.findByText('Producto 1');
-    const prod2 = await screen.findByText('Producto 2');
-    const price = await screen.findByText('100');
-    const category = await screen.findByText('Mouse');
+    const libro1 = await screen.findByText('Libro 1');
+    const libro2 = await screen.findByText('Libro 2');
+    const autor1 = await screen.findByText('Autor 1');
+    const categoria1 = await screen.findByText('Ficción');
+    const isbn1 = await screen.findByText('1234567890');
 
-    expect(prod1).toBeInTheDocument();
-    expect(prod2).toBeInTheDocument();
-    expect(price).toBeInTheDocument();
-    expect(category).toBeInTheDocument();
+    expect(libro1).toBeInTheDocument();
+    expect(libro2).toBeInTheDocument();
+    expect(autor1).toBeInTheDocument();
+    expect(categoria1).toBeInTheDocument();
+    expect(isbn1).toBeInTheDocument();
   });
 
   test('close button calls onClose', () => {
@@ -68,39 +70,39 @@ describe('DeleteProducto Component', () => {
   test('fetches products on mount', async () => {
     render(<DeleteProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
     await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledWith('/producto/find/all');
+      expect(apiFetch).toHaveBeenCalledWith('/api/libros');
     });
   });
 
   test('deletes product successfully', async () => {
-    apiFetch.mockResolvedValueOnce(mockProductos);
+    apiFetch.mockResolvedValueOnce(mockLibros);
     apiFetch.mockResolvedValueOnce(); // for delete
     render(<DeleteProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
     await waitFor(() => {
-      expect(screen.getByText('Producto 1')).toBeInTheDocument();
+      expect(screen.getByText('Libro 1')).toBeInTheDocument();
     });
     const deleteButtons = screen.getAllByText('Eliminar');
     fireEvent.click(deleteButtons[0]);
     await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledWith('/producto/delete/1', { method: 'DELETE' });
+      expect(apiFetch).toHaveBeenCalledWith('/api/libros/1', { method: 'DELETE' });
       expect(mockToast.current.show).toHaveBeenCalledWith({
         severity: 'success',
         summary: 'Éxito',
-        detail: 'El producto con ID 1 fue eliminado correctamente.',
+        detail: 'El libro con ID 1 fue eliminado correctamente.',
         life: 3000,
       });
-      expect(screen.queryByText('Producto 1')).not.toBeInTheDocument();
+      expect(screen.queryByText('Libro 1')).not.toBeInTheDocument();
     });
   });
 
-  
   test('renders table headers', async () => {
     render(<DeleteProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
     await waitFor(() => {
       expect(screen.getByText('ID')).toBeInTheDocument();
-      expect(screen.getByText('Nombre')).toBeInTheDocument();
-      expect(screen.getByText('Precio')).toBeInTheDocument();
+      expect(screen.getByText('Título')).toBeInTheDocument();
+      expect(screen.getByText('Autor')).toBeInTheDocument();
       expect(screen.getByText('Categoría')).toBeInTheDocument();
+      expect(screen.getByText('ISBN')).toBeInTheDocument();
       expect(screen.getByText('Acciones')).toBeInTheDocument();
     });
   });
@@ -109,23 +111,23 @@ describe('DeleteProducto Component', () => {
     apiFetch.mockRejectedValueOnce(new Error('Fetch error'));
     render(<DeleteProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
     await waitFor(() => {
-      expect(screen.queryByText('Producto 1')).not.toBeInTheDocument();
+      expect(screen.queryByText('Libro 1')).not.toBeInTheDocument();
     });
   });
 
   test('handles multiple deletes', async () => {
-    apiFetch.mockResolvedValueOnce(mockProductos);
+    apiFetch.mockResolvedValueOnce(mockLibros);
     apiFetch.mockResolvedValueOnce(); // delete 1
     apiFetch.mockResolvedValueOnce(); // delete 2
     render(<DeleteProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
     await waitFor(() => {
-      expect(screen.getByText('Producto 1')).toBeInTheDocument();
-      expect(screen.getByText('Producto 2')).toBeInTheDocument();
+      expect(screen.getByText('Libro 1')).toBeInTheDocument();
+      expect(screen.getByText('Libro 2')).toBeInTheDocument();
     });
     const deleteButtons = screen.getAllByText('Eliminar');
     fireEvent.click(deleteButtons[0]);
     await waitFor(() => {
-      expect(screen.queryByText('Producto 1')).not.toBeInTheDocument();
+      expect(screen.queryByText('Libro 1')).not.toBeInTheDocument();
     });
   });
 });

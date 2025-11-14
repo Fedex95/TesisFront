@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
@@ -26,15 +26,14 @@ describe('Navbar Component', () => {
       <MemoryRouter>
         <Navbar
           cartItemsCount={0}
-          handleNavigation={mockHandleNavigation}
           userMenuItems={mockUserMenuItems}
           userMenu={mockUserMenu}
           userData={mockUserData}
         />
       </MemoryRouter>
     );
-    expect(screen.getByText('Electro Master')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Electro Master' })).toHaveAttribute('href', '/home');
+    expect(screen.getByText('Library Master')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Library Master' })).toHaveAttribute('href', '/home');
   });
 
   test('displays user name and surname', () => {
@@ -42,7 +41,6 @@ describe('Navbar Component', () => {
       <MemoryRouter>
         <Navbar
           cartItemsCount={0}
-          handleNavigation={mockHandleNavigation}
           userMenuItems={mockUserMenuItems}
           userMenu={mockUserMenu}
           userData={mockUserData}
@@ -58,7 +56,6 @@ describe('Navbar Component', () => {
       <MemoryRouter>
         <Navbar
           cartItemsCount={3}
-          handleNavigation={mockHandleNavigation}
           userMenuItems={mockUserMenuItems}
           userMenu={mockUserMenu}
           userData={mockUserData}
@@ -73,7 +70,6 @@ describe('Navbar Component', () => {
       <MemoryRouter>
         <Navbar
           cartItemsCount={0}
-          handleNavigation={mockHandleNavigation}
           userMenuItems={mockUserMenuItems}
           userMenu={mockUserMenu}
           userData={mockUserData}
@@ -81,41 +77,5 @@ describe('Navbar Component', () => {
       </MemoryRouter>
     );
     expect(screen.queryByText('0')).not.toBeInTheDocument();
-  });
-
-  test('renders three primary buttons and user menu toggles on click', () => {
-    render(
-      <MemoryRouter>
-        <Navbar
-          cartItemsCount={0}
-          handleNavigation={mockHandleNavigation}
-          userMenuItems={mockUserMenuItems}
-          userMenu={mockUserMenu}
-          userData={mockUserData}
-        />
-      </MemoryRouter>
-    );
-
-    const buttons = screen.getAllByRole('button');
-    // comprobamos que hay al menos 3 botones principales (brand link excluded)
-    expect(buttons.length).toBeGreaterThanOrEqual(3);
-
-  });
-
-  test('user menu button exists and is interactive', () => {
-    render(
-      <MemoryRouter>
-        <Navbar
-          cartItemsCount={0}
-          handleNavigation={mockHandleNavigation}
-          userMenuItems={mockUserMenuItems}
-          userMenu={mockUserMenu}
-          userData={mockUserData}
-        />
-      </MemoryRouter>
-    );
-
-    const buttons = screen.getAllByRole('button');
-    expect(buttons[2]).toBeInTheDocument();    
   });
 });

@@ -39,10 +39,11 @@ describe('Login Component', () => {
         <Login onLogin={mockOnLogin} />
       </MemoryRouter>
     );
-    expect(screen.getByLabelText('Usuario')).toBeInTheDocument();
+    expect(screen.getByLabelText('Correo')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Ingresa tu contraseña')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Iniciar Sesión' })).toBeInTheDocument();
     expect(screen.getByText('Regístrate aquí')).toBeInTheDocument();
+    expect(screen.getByText('Verifica aquí')).toBeInTheDocument();
   });
 
   test('button is disabled when fields are empty', () => {
@@ -61,29 +62,29 @@ describe('Login Component', () => {
         <Login onLogin={mockOnLogin} />
       </MemoryRouter>
     );
-    const usernameInput = screen.getByLabelText('Usuario');
+    const emailInput = screen.getByLabelText('Correo');
     const passwordInput = screen.getByPlaceholderText('Ingresa tu contraseña');
 
-    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
+    fireEvent.change(emailInput, { target: { value: 'testuser' } });
     fireEvent.change(passwordInput, { target: { value: 'testpass' } });
 
-    expect(usernameInput.value).toBe('testuser');
+    expect(emailInput.value).toBe('testuser');
     expect(passwordInput.value).toBe('testpass');
   });
 
   test('shows success message and navigates on successful login', async () => {
-    apiFetch.mockResolvedValueOnce({ token: 'mock-token' });
+    apiFetch.mockResolvedValueOnce({ token: 'mock-token', refreshToken: 'mock-refresh' });
     decodeJwt.mockReturnValueOnce({ userId: 1, nombre: 'testuser', rol: 'ADMIN' });
     render(
       <MemoryRouter>
         <Login onLogin={mockOnLogin} />
       </MemoryRouter>
     );
-    const usernameInput = screen.getByLabelText('Usuario');
+    const emailInput = screen.getByLabelText('Correo');
     const passwordInput = screen.getByPlaceholderText('Ingresa tu contraseña');
     const submitButton = screen.getByRole('button', { name: 'Iniciar Sesión' });
 
-    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
+    fireEvent.change(emailInput, { target: { value: 'testuser' } });
     fireEvent.change(passwordInput, { target: { value: 'testpass' } });
     fireEvent.click(submitButton);
 
@@ -94,30 +95,33 @@ describe('Login Component', () => {
       expect(mockOnLogin).toHaveBeenCalledWith({
         id: 1,
         nombre: 'testuser',
-        admin: true,
+        rol: 'ADMIN',
         token: 'mock-token',
+        refreshToken: 'mock-refresh',
       });
       expect(mockNavigate).toHaveBeenCalledWith('/home');
     });
   });
 
-  test('shows error message on invalid login', async () => {
-    apiFetch.mockRejectedValueOnce(new Error('Invalid credentials'));
+  test('navigates to verify on 403 error', async () => {
+    const error = new Error('Cuenta no verificada');
+    error.status = 403;
+    apiFetch.mockRejectedValueOnce(error);
     render(
       <MemoryRouter>
         <Login onLogin={mockOnLogin} />
       </MemoryRouter>
     );
-    const usernameInput = screen.getByLabelText('Usuario');
+    const emailInput = screen.getByLabelText('Correo');
     const passwordInput = screen.getByPlaceholderText('Ingresa tu contraseña');
     const submitButton = screen.getByRole('button', { name: 'Iniciar Sesión' });
 
-    fireEvent.change(usernameInput, { target: { value: 'wronguser' } });
+    fireEvent.change(emailInput, { target: { value: 'wronguser' } });
     fireEvent.change(passwordInput, { target: { value: 'wrongpass' } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Error de red')).toBeInTheDocument();
+      expect(mockNavigate).toHaveBeenCalledWith('/verify', { state: { email: 'wronguser' } });
     });
   });
 
@@ -128,16 +132,16 @@ describe('Login Component', () => {
         <Login onLogin={mockOnLogin} />
       </MemoryRouter>
     );
-    const usernameInput = screen.getByLabelText('Usuario');
+    const emailInput = screen.getByLabelText('Correo');
     const passwordInput = screen.getByPlaceholderText('Ingresa tu contraseña');
     const submitButton = screen.getByRole('button', { name: 'Iniciar Sesión' });
 
-    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
+    fireEvent.change(emailInput, { target: { value: 'testuser' } });
     fireEvent.change(passwordInput, { target: { value: 'testpass' } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Error de red')).toBeInTheDocument();
+      expect(screen.getByText('Network error')).toBeInTheDocument();
     });
   });
 
@@ -148,11 +152,11 @@ describe('Login Component', () => {
         <Login onLogin={mockOnLogin} />
       </MemoryRouter>
     );
-    const usernameInput = screen.getByLabelText('Usuario');
+    const emailInput = screen.getByLabelText('Correo');
     const passwordInput = screen.getByPlaceholderText('Ingresa tu contraseña');
     const submitButton = screen.getByRole('button', { name: 'Iniciar Sesión' });
 
-    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
+    fireEvent.change(emailInput, { target: { value: 'testuser' } });
     fireEvent.change(passwordInput, { target: { value: 'testpass' } });
     fireEvent.click(submitButton);
 
@@ -162,38 +166,38 @@ describe('Login Component', () => {
   });
 
   test('clears fields after successful login', async () => {
-    apiFetch.mockResolvedValueOnce({ token: 'mock-token' });
+    apiFetch.mockResolvedValueOnce({ token: 'mock-token', refreshToken: 'mock-refresh' });
     decodeJwt.mockReturnValueOnce({ userId: 1, nombre: 'testuser', rol: 'USER' });
     render(
       <MemoryRouter>
         <Login onLogin={mockOnLogin} />
       </MemoryRouter>
     );
-    const usernameInput = screen.getByLabelText('Usuario');
+    const emailInput = screen.getByLabelText('Correo');
     const passwordInput = screen.getByPlaceholderText('Ingresa tu contraseña');
 
-    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
+    fireEvent.change(emailInput, { target: { value: 'testuser' } });
     fireEvent.change(passwordInput, { target: { value: 'testpass' } });
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión' }));
 
     await waitFor(() => {
-      expect(usernameInput.value).toBe('');
+      expect(emailInput.value).toBe('');
       expect(passwordInput.value).toBe('');
     });
   });
 
   test('handles admin role correctly', async () => {
-    apiFetch.mockResolvedValueOnce({ token: 'mock-token' });
+    apiFetch.mockResolvedValueOnce({ token: 'mock-token', refreshToken: 'mock-refresh' });
     decodeJwt.mockReturnValueOnce({ userId: 1, nombre: 'adminuser', rol: 'ADMIN' });
     render(
       <MemoryRouter>
         <Login onLogin={mockOnLogin} />
       </MemoryRouter>
     );
-    const usernameInput = screen.getByLabelText('Usuario');
+    const emailInput = screen.getByLabelText('Correo');
     const passwordInput = screen.getByPlaceholderText('Ingresa tu contraseña');
 
-    fireEvent.change(usernameInput, { target: { value: 'adminuser' } });
+    fireEvent.change(emailInput, { target: { value: 'adminuser' } });
     fireEvent.change(passwordInput, { target: { value: 'adminpass' } });
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión' }));
 
@@ -201,24 +205,25 @@ describe('Login Component', () => {
       expect(mockOnLogin).toHaveBeenCalledWith({
         id: 1,
         nombre: 'adminuser',
-        admin: true,
+        rol: 'ADMIN',
         token: 'mock-token',
+        refreshToken: 'mock-refresh',
       });
     });
   });
 
   test('handles user role correctly', async () => {
-    apiFetch.mockResolvedValueOnce({ token: 'mock-token' });
+    apiFetch.mockResolvedValueOnce({ token: 'mock-token', refreshToken: 'mock-refresh' });
     decodeJwt.mockReturnValueOnce({ userId: 2, nombre: 'regularuser', rol: 'USER' });
     render(
       <MemoryRouter>
         <Login onLogin={mockOnLogin} />
       </MemoryRouter>
     );
-    const usernameInput = screen.getByLabelText('Usuario');
+    const emailInput = screen.getByLabelText('Correo');
     const passwordInput = screen.getByPlaceholderText('Ingresa tu contraseña');
 
-    fireEvent.change(usernameInput, { target: { value: 'regularuser' } });
+    fireEvent.change(emailInput, { target: { value: 'regularuser' } });
     fireEvent.change(passwordInput, { target: { value: 'userpass' } });
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión' }));
 
@@ -226,20 +231,24 @@ describe('Login Component', () => {
       expect(mockOnLogin).toHaveBeenCalledWith({
         id: 2,
         nombre: 'regularuser',
-        admin: false,
+        rol: 'USER',
         token: 'mock-token',
+        refreshToken: 'mock-refresh',
       });
     });
   });
 
-  test('renders register link', () => {
+  test('renders register and verify links', () => {
     render(
       <MemoryRouter>
         <Login onLogin={mockOnLogin} />
       </MemoryRouter>
     );
     const registerLink = screen.getByText('Regístrate aquí');
+    const verifyLink = screen.getByText('Verifica aquí');
     expect(registerLink).toBeInTheDocument();
+    expect(verifyLink).toBeInTheDocument();
     expect(registerLink.closest('a')).toHaveAttribute('href', '/register');
+    expect(verifyLink.closest('a')).toHaveAttribute('href', '/verify');
   });
 });

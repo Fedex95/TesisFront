@@ -1,43 +1,67 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { apiFetch } from '../lib/api';
 
-export default function Pedidos({ userId }) {
+export default function Pedidos({ userData }) {  
     const [pedidos, setPedidos] = useState([]);
-    const [error] = useState(null);
+    const [tickets, setTickets] = useState({});  
+    const [error, setError] = useState(null); 
 
     const fetchHistorial = useCallback(async () => {
         try {
-            const data = await apiFetch('/api/historial/user');
-            setPedidos(data);
+            const data = await apiFetch('/api/prestamos/historial'); 
+
+            const list =
+                Array.isArray(data) ? data :
+                Array.isArray(data?.data) ? data.data :
+                Array.isArray(data?.content) ? data.content :
+                Array.isArray(data?.items) ? data.items :
+                [];
+
+            setPedidos(list);
+
+            if (list.length > 0) {
+                const ticketPromises = list.map(pedido => apiFetch(`/api/prestamos/${pedido.id}/ticket`));
+                const ticketResults = await Promise.all(ticketPromises);
+                const ticketMap = {};
+                list.forEach((pedido, index) => {
+                    ticketMap[pedido.id] = ticketResults[index]; 
+                });
+                setTickets(ticketMap);
+            }
         } catch (error) {
             console.error('Error:', error);
+            setError('Error al cargar pedidos: ' + error.message);  
         }
     }, []);
 
     useEffect(() => {
-        fetchHistorial();
-    }, [userId, fetchHistorial]);
+        if (userData?.id) {
+            fetchHistorial();
+        }
+    }, [userData, fetchHistorial]);
 
     if (error) return <div>Error: {error}</div>;
 
-    const calcularTotal = (detalles) => {
+    const calcularTotal = (detalles) => { 
         if (!detalles || !Array.isArray(detalles)) return 0;
 
         return detalles.reduce((total, detalle) => {
-            return total + (detalle.precio || 0) * (detalle.cantidad || 1);
+            return total + (detalle.cantidad || 1);
         }, 0);
     };
 
-    const transformarPedidos = (pedidos) => {
+    const transformarPedidos = (pedidos) => {  
         return (pedidos || []).map((pedido) => {
-            const total = calcularTotal(pedido.detalles || []);
+            const total = calcularTotal(pedido.detallesPrestamo || []);  
             return {
-                fechaCompra: new Date(pedido.fecha).toLocaleDateString('es-EC'),
+                fechaSolicitud: new Date(pedido.fechaSolicitud).toLocaleDateString('es-EC'), 
                 usuario: `${pedido.usuario.nombre} (${pedido.usuario.usuario})`,
-                total: total.toFixed(2),
-                detalles: pedido.detalles || [],
+                estado: pedido.estado,  
+                total: total,  
+                detalles: pedido.detallesPrestamo || [],  
+                ticket: tickets[pedido.id] || 'Cargando...',  
             };
         });
     };
@@ -46,17 +70,25 @@ export default function Pedidos({ userId }) {
 
     return (
         <div className="card">
-            <DataTable value={transformedPedidos} tableStyle={{ minWidth: '50rem' }}>
-                <Column field="fechaCompra" header="Fecha de compra" />
+            <div style={{ display: 'none' }}>Debug: {JSON.stringify(transformedPedidos)}</div>
+            <DataTable value={transformedPedidos} tableStyle={{ minWidth: '50rem' }}> 
+                <Column field="fechaSolicitud" header="Fecha de solicitud" />  
+                <Column field="estado" header="Estado" />  
                 <Column 
                     field="total" 
                     header="Total" 
-                    body={(rowData) => <span>${rowData.total}</span>} 
+                    body={(rowData) => <span>{rowData.total}</span>} 
                 />
                 <Column
-                    header="Nombre del producto"
+                    header="Título del libro"  
                     body={(rowData) => rowData.detalles.map((detalle, index) => (
-                        <div key={index}>{detalle.nombreProducto}</div>
+                        <div key={index}>{detalle.libro.titulo}</div> 
+                    ))}
+                />
+                <Column
+                    header="Autor"  
+                    body={(rowData) => rowData.detalles.map((detalle, index) => (
+                        <div key={index}>{detalle.libro.autor}</div>  
                     ))}
                 />
                 <Column
@@ -66,10 +98,14 @@ export default function Pedidos({ userId }) {
                     ))}
                 />
                 <Column
-                    header="Precio"
-                    body={(rowData) => rowData.detalles.map((detalle, index) => (
-                        <div key={index}>{detalle.precio.toFixed(2)}</div>
-                    ))}
+                    field="ticket"
+                    header="Ticket"
+                    body={(rowData) => {
+                        if (rowData.ticket && typeof rowData.ticket === 'object' && rowData.ticket.codigo) {
+                            return <span>{rowData.ticket.codigo}</span>;
+                        }
+                        return <span>{rowData.ticket}</span>;
+                    }}
                 />
             </DataTable>
         </div>

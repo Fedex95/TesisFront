@@ -11,41 +11,35 @@ import { useNavigate } from 'react-router-dom';
 function Home({ userData }) {
     const toast = useRef(null);
     const navigate = useNavigate();
-    const [featuredProducts, setFeaturedProducts] = useState([]);
+    const [featuredLibros, setFeaturedLibros] = useState([]);  
     const [quantities, setQuantities] = useState({});
-    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedLibro, setSelectedLibro] = useState(null); 
     const [dialogVisible, setDialogVisible] = useState(false);
 
-    const categorias = [
-        { label: 'Mouse', value: 'Mouse' },
-        { label: 'Teclado', value: 'Teclado' },
-        { label: 'Case', value: 'Case' },
-        { label: 'Procesador', value: 'Procesador' },
-        { label: 'Tarjeta Gráfica', value: 'TarjetaGrafica' },
-        { label: 'Memoria RAM', value: 'MemoriaRAM' },
-        { label: 'Memoria ROM', value: 'MemoriaROM' },
-        { label: 'Placa Madre', value: 'PlacaMadre' },
-        { label: 'Accesorios', value: 'Accesorios' },
-        { label: 'Fuente de Poder', value: 'FuentePoder' },
-        { label: 'Ventilador', value: 'Ventilador' },
-        { label: 'Monitores', value: 'Monitores' }
+    const categorias = [  
+        { label: 'Ficción', value: 'Ficción' },
+        { label: 'No Ficción', value: 'NoFicción' },
+        { label: 'Ciencia', value: 'Ciencia' },
+        { label: 'Historia', value: 'Historia' },
+        { label: 'Biografía', value: 'Biografía' },
+        
     ];
 
     useEffect(() => {
-        const fetchProductos = async () => {
+        const fetchLibros = async () => { 
             try {
-                const data = await apiFetch('/api/producto/find/all'); 
+                const data = await apiFetch('/api/libros'); 
 
                 if (data && data.length > 0) {
                     const shuffled = data.sort(() => 0.5 - Math.random());
                     const selected = shuffled.slice(0, 9);
 
                     const initialQuantities = {};
-                    selected.forEach(producto => {
-                        initialQuantities[producto.id] = 1;
+                    selected.forEach(libro => {  
+                        initialQuantities[libro.id] = 1;
                     });
                     setQuantities(initialQuantities);
-                    setFeaturedProducts(selected);
+                    setFeaturedLibros(selected);  
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -53,23 +47,22 @@ function Home({ userData }) {
         };
 
         const token = sessionStorage.getItem('auth_token');
-        console.log('Token en Home:', token); 
         if (!token) {
             console.log('No hay token, redirigiendo a login');
             navigate('/login');
             return;
         }
-        fetchProductos();
+        fetchLibros(); 
     }, [navigate]);
 
-    const handleQuantityChange = (productoId, value) => {
+    const handleQuantityChange = (libroId, value) => {  
         setQuantities(prev => ({
             ...prev,
-            [productoId]: value
+            [libroId]: value
         }));
     };
 
-    const addToCart = async (productoId) => {
+    const addToCart = async (libroId) => {  
         if (!userData || !userData.id) {
             toast.current.show({
                 severity: 'error',
@@ -82,12 +75,11 @@ function Home({ userData }) {
         
 
         try {
-            const quantity = quantities[productoId] || 1;
+            const quantity = quantities[libroId] || 1;
             await apiFetch('/api/cart/agregar', { 
               method: 'POST',
               body: JSON.stringify({
-                usuarioId: userData.id,
-                productoId: productoId,
+                libroId: libroId,  
                 cantidad: quantity
               })
             });
@@ -95,7 +87,7 @@ function Home({ userData }) {
             toast.current.show({
                 severity: 'success',
                 summary: '¡Éxito!',
-                detail: 'Producto agregado al carrito',
+                detail: 'Libro agregado al carrito',
                 life: 3000
             });
 
@@ -110,25 +102,25 @@ function Home({ userData }) {
         }
     };
 
-    const openDialog = (producto) => {
-        setSelectedProduct(producto);
+    const openDialog = (libro) => { 
+        setSelectedLibro(libro); 
         setDialogVisible(true);
     };
 
-    const quantityTemplate = (productoId, currentQuantity, onQuantityChange) => (
+    const quantityTemplate = (libroId, currentQuantity, onQuantityChange) => ( 
         <div className="p-d-flex p-ai-center space-x-2">
             <Button
                 icon="pi pi-minus"
                 className="p-button-rounded p-button-outlined p-mr-2"
                 onClick={(e) => {
                     e.stopPropagation();
-                    onQuantityChange(productoId, Math.max(1, currentQuantity - 1));
+                    onQuantityChange(libroId, Math.max(1, currentQuantity - 1)); 
                 }}
                 disabled={currentQuantity <= 1}
             />
             <InputNumber
                 value={currentQuantity}
-                onValueChange={(e) => onQuantityChange(productoId, e.value)}
+                onValueChange={(e) => onQuantityChange(libroId, e.value)} 
                 showButtons={false}
                 min={1}
                 max={10}
@@ -140,25 +132,25 @@ function Home({ userData }) {
                 className="p-button-rounded p-button-outlined p-ml-2"
                 onClick={(e) => {
                     e.stopPropagation();
-                    onQuantityChange(productoId, Math.min(10, currentQuantity + 1));
+                    onQuantityChange(libroId, Math.min(10, currentQuantity + 1));  
                 }}
                 disabled={currentQuantity >= 10}
             />
         </div>
     );
 
-    const menuTemplate = (producto) => (
+    const menuTemplate = (libro) => ( 
         <Card
             className="menu-card p-shadow-2 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4"
             style={{
                 height: '450px',
                 marginBottom: '20px',
             }}
-            onClick={() => openDialog(producto)}
+            onClick={() => openDialog(libro)} 
         >
             <img
-                src={producto.imagenURL}
-                alt={producto.nombre}
+                src={libro.imagenUrl}  
+                alt={libro.titulo}  
                 className="menu-image"
                 onError={(e) => e.target.src = 'https://via.placeholder.com/300'}
                 style={{
@@ -170,19 +162,19 @@ function Home({ userData }) {
                 }}
             />
             <div className="menu-content flex flex-col justify-between p-4">
-                <h3 className="menu-title text-lg font-semibold">{producto.nombre}</h3>
+                <h3 className="menu-title text-lg font-semibold">{libro.titulo}</h3>
                 <p className="menu-description text-sm text-gray-600 line-clamp-3">
-                    {producto.descripcion}
+                    {libro.descripcion}
                 </p>
                 <div className="menu-details flex justify-between mt-2">
-                    <span className="menu-price text-xl font-bold">${producto.precio.toFixed(2)}</span>
+                    <span className="menu-author text-sm text-gray-500">Autor: {libro.autor}</span> 
                     <span className="menu-category text-sm text-gray-500">
-                        {categorias[producto.categoria] || producto.categoria}
+                        {categorias.find(c => c.value === libro.categoria)?.label || libro.categoria}
                     </span>
                 </div>
 
                 <div className="mt-3">
-                    {quantityTemplate(producto.id, quantities[producto.id] ?? 1, handleQuantityChange)}
+                    {quantityTemplate(libro.id, quantities[libro.id] ?? 1, handleQuantityChange)}  
                 </div>
             </div>
         </Card>
@@ -216,7 +208,7 @@ function Home({ userData }) {
             <div className="mb-4">
                 <Carousel
                     className='card-container'
-                    value={featuredProducts}
+                    value={featuredLibros}  
                     itemTemplate={menuTemplate}
                     numVisible={3}
                     numScroll={1}
@@ -227,7 +219,7 @@ function Home({ userData }) {
             </div>
 
             <Dialog
-                header="Especificaciones"
+                header="Detalles del Libro" 
                 visible={dialogVisible}
                 style={{
                     width: '30vw',
@@ -253,8 +245,8 @@ function Home({ userData }) {
                     }}
                 >
                     <img
-                        src={selectedProduct?.imagenURL}
-                        alt={selectedProduct?.nombre}
+                        src={selectedLibro?.imagenUrl} 
+                        alt={selectedLibro?.titulo}  
                         className="menu-image"
                         style={{
                             width: '100%',
@@ -272,7 +264,7 @@ function Home({ userData }) {
                             marginBottom: '8px',
                         }}
                     >
-                        {selectedProduct?.nombre}
+                        {selectedLibro?.titulo}  
                     </h3>
                     <p
                         style={{
@@ -281,17 +273,25 @@ function Home({ userData }) {
                             marginBottom: '12px',
                         }}
                     >
-                        {selectedProduct?.descripcion}
+                        {selectedLibro?.descripcion}
                     </p>
                     <p
                         style={{
-                            fontSize: '18px',
-                            fontWeight: 'bold',
-                            color: '#007BFF',
+                            fontSize: '14px',
+                            color: '#888',
                             marginBottom: '10px',
                         }}
                     >
-                        ${selectedProduct?.precio.toFixed(2)}
+                        Autor: {selectedLibro?.autor} 
+                    </p>
+                    <p
+                        style={{
+                            fontSize: '14px',
+                            color: '#888',
+                            marginBottom: '10px',
+                        }}
+                    >
+                        ISBN: {selectedLibro?.isbn}  
                     </p>
                     <p
                         style={{
@@ -301,10 +301,10 @@ function Home({ userData }) {
                             marginBottom: '20px',
                         }}
                     >
-                        {categorias[selectedProduct?.categoria]}
+                        {categorias.find(c => c.value === selectedLibro?.categoria)?.label || selectedLibro?.categoria}
                     </p>
 
-                    {selectedProduct && (
+                    {selectedLibro && (
                         <div>
                             <p
                                 style={{
@@ -333,8 +333,8 @@ function Home({ userData }) {
                                         padding: '0',
                                         fontSize: '16px',
                                     }}
-                                    onClick={() => handleQuantityChange(selectedProduct.id, (quantities[selectedProduct.id] || 1) - 1)}
-                                    disabled={(quantities[selectedProduct.id] || 1) <= 1}
+                                    onClick={() => handleQuantityChange(selectedLibro.id, (quantities[selectedLibro.id] || 1) - 1)}  
+                                    disabled={(quantities[selectedLibro.id] || 1) <= 1}
                                 />
                                 <span
                                     style={{
@@ -342,7 +342,7 @@ function Home({ userData }) {
                                         fontWeight: 'bold',
                                     }}
                                 >
-                                    {quantities[selectedProduct.id] || 1}
+                                    {quantities[selectedLibro.id] || 1}
                                 </span>
                                 <Button
                                     icon="pi pi-plus"
@@ -353,7 +353,7 @@ function Home({ userData }) {
                                         padding: '0',
                                         fontSize: '16px',
                                     }}
-                                    onClick={() => handleQuantityChange(selectedProduct.id, (quantities[selectedProduct.id] || 1) + 1)}
+                                    onClick={() => handleQuantityChange(selectedLibro.id, (quantities[selectedLibro.id] || 1) + 1)}  
                                 />
                             </div>
                             <Button
@@ -366,7 +366,7 @@ function Home({ userData }) {
                                     fontSize: '14px',
                                     fontWeight: 'bold',
                                 }}
-                                onClick={() => addToCart(selectedProduct.id)}
+                                onClick={() => addToCart(selectedLibro.id)} 
                             />
                         </div>
                     )}

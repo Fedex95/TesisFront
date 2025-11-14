@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import UpdateProducto from '../components/Updateproduct';
+import UpdateLibro from '../components/Updateproduct';
 import { apiFetch } from '../lib/api';
 
 jest.mock('../lib/api', () => ({
@@ -15,93 +15,107 @@ beforeAll(() => {
   helpers.createStylesheet = jest.fn(() => ({}));
 });
 
-describe('UpdateProducto Component', () => {
+describe('UpdateLibro Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   test('renders without crashing', () => {
     apiFetch.mockResolvedValueOnce([]);
-    render(<UpdateProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
-    expect(screen.getByText('Seleccionar producto')).toBeInTheDocument();
+    render(<UpdateLibro toast={mockToast} onClose={mockOnClose} />);
+    expect(screen.getByText('Seleccionar libro')).toBeInTheDocument();
     expect(screen.getByText('Cerrar')).toBeInTheDocument();
   });
 
   test('fetches products on mount', async () => {
-    const mockProducts = [
-      { id: 1, nombre: 'Producto 1', descripcion: 'Desc 1', precio: 10, imagenURL: 'url1', categoria: 'Mouse' },
+    const mockLibros = [
+      { id: 1, titulo: 'Libro 1', descripcion: 'Desc 1', autor: 'Autor 1', isbn: '1234567890', imagenUrl: 'url1', categoria: 'Ficción', copiasDisponibles: 10 },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
+    apiFetch.mockResolvedValueOnce(mockLibros);
 
-    render(<UpdateProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
+    render(<UpdateLibro toast={mockToast} onClose={mockOnClose} />);
 
     await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledWith('/producto/find/all');
+      expect(apiFetch).toHaveBeenCalledWith('/api/libros');
     });
   });
 
   test('selecting a product fills the form', async () => {
-    const mockProducts = [
-      { id: 1, nombre: 'Producto 1', descripcion: 'Desc 1', precio: 10, imagenURL: 'url1', categoria: 'Mouse' },
+    const mockLibros = [
+      { id: 1, titulo: 'Libro 1', descripcion: 'Desc 1', autor: 'Autor 1', isbn: '1234567890', imagenUrl: 'url1', categoria: 'Ficción', copiasDisponibles: 10 },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
+    apiFetch.mockResolvedValueOnce(mockLibros);
 
-    render(<UpdateProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
+    render(<UpdateLibro toast={mockToast} onClose={mockOnClose} />);
 
     const dropdown = screen.getByRole('button', { name: '' });
     fireEvent.click(dropdown);
-    await waitFor(() => screen.getByText('Producto 1'));
-    fireEvent.click(screen.getByText('Producto 1'));
+    await waitFor(() => screen.getByText('Libro 1'));
+    fireEvent.click(screen.getByText('Libro 1'));
 
     await waitFor(() => {
-      const nameFields = screen.getAllByDisplayValue('Producto 1');
-      expect(nameFields.length).toBeGreaterThan(0);
-      expect(screen.getByDisplayValue('Desc 1')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('$10.00')).toBeInTheDocument();
+      expect(screen.getByLabelText('Título')).toHaveValue('Libro 1');
+      expect(screen.getByLabelText('Descripción')).toHaveValue('Desc 1');
+      expect(screen.getByLabelText('Autor')).toHaveValue('Autor 1');
+      expect(screen.getByLabelText('ISBN')).toHaveValue('1234567890');
+      expect(screen.getByLabelText('Imagen URL')).toHaveValue('url1');
     });
   });
 
   test('updating product successfully shows success toast and calls onClose', async () => {
-    const mockProducts = [
-      { id: 1, nombre: 'Producto 1', descripcion: 'Desc 1', precio: '10', imagenURL: 'url1', categoria: 'Mouse' },
+    const mockLibros = [
+      { id: 1, titulo: 'Libro 1', descripcion: 'Desc 1', autor: 'Autor 1', isbn: '1234567890', imagenUrl: 'url1', categoria: 'Ficción', copiasDisponibles: 10 },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
+
+    apiFetch.mockResolvedValueOnce(mockLibros);
     apiFetch.mockResolvedValueOnce();
 
-    render(<UpdateProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
+    render(<UpdateLibro toast={mockToast} onClose={mockOnClose} />);
 
     const dropdown = screen.getByRole('button', { name: '' });
     fireEvent.click(dropdown);
-    await waitFor(() => screen.getByText('Producto 1'));
-    fireEvent.click(screen.getByText('Producto 1'));
-    
+
+    await waitFor(() => screen.getByText('Libro 1'));
+    fireEvent.click(screen.getByText('Libro 1'));
+
     await waitFor(() => {
-      expect(screen.getByLabelText('Nombre')).toHaveValue('Producto 1');
+      expect(screen.getByLabelText('Título')).toHaveValue('Libro 1');
       expect(screen.getByLabelText('Descripción')).toHaveValue('Desc 1');
+      expect(screen.getByLabelText('Autor')).toHaveValue('Autor 1');
+      expect(screen.getByLabelText('ISBN')).toHaveValue('1234567890');
       expect(screen.getByLabelText('Imagen URL')).toHaveValue('url1');
-      expect(screen.getByLabelText('Precio').value).toContain('10');
     });
 
-    const updateButton = screen.getByText('Actualizar');
-    fireEvent.click(updateButton);
+    fireEvent.click(screen.getByText('Actualizar'));
 
     await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledWith('/producto/edit/1', {
-        method: 'PUT',
-        body: JSON.stringify({
-          nombre: 'Producto 1',
-          descripcion: 'Desc 1',
-          precio: '10',
-          imagenURL: 'url1',
-          categoria: 'Mouse',
-        }),
+      expect(apiFetch).toHaveBeenNthCalledWith(
+        2,
+        '/api/libros/1',
+        expect.objectContaining({
+          method: 'PUT',
+          body: expect.any(String),
+        })
+      );
+
+      const body = JSON.parse(apiFetch.mock.calls[1][1].body);
+      expect(body).toEqual({
+        titulo: 'Libro 1',
+        descripcion: 'Desc 1',
+        autor: 'Autor 1',
+        isbn: '1234567890',
+        imagenUrl: 'url1',
+        categoria: 'Ficción',
+        copiasDisponibles: 10,
       });
+
       expect(mockToast.current.show).toHaveBeenCalledWith({
         severity: 'success',
         summary: 'Éxito',
-        detail: 'El producto con ID 1 fue actualizado correctamente.',
+        detail: 'El libro con ID 1 fue actualizado correctamente.',
         life: 3000,
       });
+
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
   });
@@ -110,108 +124,90 @@ describe('UpdateProducto Component', () => {
   test('fetch error shows error toast', async () => {
     apiFetch.mockRejectedValueOnce(new Error('Network error'));
 
-    render(<UpdateProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
+    render(<UpdateLibro toast={mockToast} onClose={mockOnClose} />);
 
     await waitFor(() => {
       expect(mockToast.current.show).toHaveBeenCalledWith({
         severity: 'error',
         summary: 'Error',
-        detail: 'No se pudieron cargar los productos.',
+        detail: 'No se pudieron cargar los libros.',
         life: 3000,
       });
     });
   });
 
   test('renders form fields when product is selected', async () => {
-    const mockProducts = [
-      { id: 1, nombre: 'Producto 1', descripcion: 'Desc 1', precio: 10, imagenURL: 'url1', categoria: 'Mouse' },
+    const mockLibros = [
+      { id: 1, titulo: 'Libro 1', descripcion: 'Desc 1', autor: 'Autor 1', isbn: '1234567890', imagenUrl: 'url1', categoria: 'Ficción', copiasDisponibles: 10 },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
+    apiFetch.mockResolvedValueOnce(mockLibros);
 
-    render(<UpdateProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
+    render(<UpdateLibro toast={mockToast} onClose={mockOnClose} />);
 
     const dropdown = screen.getByRole('button', { name: '' });
     fireEvent.click(dropdown);
-    await waitFor(() => screen.getByText('Producto 1'));
-    fireEvent.click(screen.getByText('Producto 1'));
+    await waitFor(() => screen.getByText('Libro 1'));
+    fireEvent.click(screen.getByText('Libro 1'));
 
     await waitFor(() => {
-      expect(screen.getByLabelText('Nombre')).toBeInTheDocument();
+      expect(screen.getByLabelText('Título')).toBeInTheDocument();
+      expect(screen.getByLabelText('Autor')).toBeInTheDocument();
       expect(screen.getByLabelText('Descripción')).toBeInTheDocument();
-      expect(screen.getByLabelText('Precio')).toBeInTheDocument();
+      expect(screen.getByLabelText('ISBN')).toBeInTheDocument();
       expect(screen.getByLabelText('Imagen URL')).toBeInTheDocument();
       expect(screen.getByLabelText('Categoría')).toBeInTheDocument();
+      expect(screen.getByLabelText('Copias Disponibles')).toBeInTheDocument();
     });
   });
 
   test('allows changing form fields', async () => {
-    const mockProducts = [
-      { id: 1, nombre: 'Producto 1', descripcion: 'Desc 1', precio: 10, imagenURL: 'url1', categoria: 'Mouse' },
+    const mockLibros = [
+      { id: 1, titulo: 'Libro 1', descripcion: 'Desc 1', autor: 'Autor 1', isbn: '1234567890', imagenUrl: 'url1', categoria: 'Ficción', copiasDisponibles: 10 },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
+    apiFetch.mockResolvedValueOnce(mockLibros);
 
-    render(<UpdateProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
+    render(<UpdateLibro toast={mockToast} onClose={mockOnClose} />);
 
     const dropdown = screen.getByRole('button', { name: '' });
     fireEvent.click(dropdown);
-    await waitFor(() => screen.getByText('Producto 1'));
-    fireEvent.click(screen.getByText('Producto 1'));
+    await waitFor(() => screen.getByText('Libro 1'));
+    fireEvent.click(screen.getByText('Libro 1'));
 
     await waitFor(() => {
-      const nombreInput = screen.getByLabelText('Nombre');
-      fireEvent.change(nombreInput, { target: { value: 'Producto Updated' } });
-      expect(nombreInput.value).toBe('Producto Updated');
+      const tituloInput = screen.getByLabelText('Título');
+      fireEvent.change(tituloInput, { target: { value: 'Libro Updated' } });
+      expect(tituloInput.value).toBe('Libro Updated');
     });
   });
 
   test('close button calls onClose', () => {
     apiFetch.mockResolvedValueOnce([]);
-    render(<UpdateProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
+    render(<UpdateLibro toast={mockToast} onClose={mockOnClose} />);
     const closeButton = screen.getByText('Cerrar');
     fireEvent.click(closeButton);
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
   test('renders dropdown with product options', async () => {
-    const mockProducts = [
-      { id: 1, nombre: 'Producto 1', descripcion: 'Desc 1', precio: 10, imagenURL: 'url1', categoria: 'Mouse' },
-      { id: 2, nombre: 'Producto 2', descripcion: 'Desc 2', precio: 20, imagenURL: 'url2', categoria: 'Teclado' },
+    const mockLibros = [
+      { id: 1, titulo: 'Libro 1', descripcion: 'Desc 1', autor: 'Autor 1', isbn: '1234567890', imagenUrl: 'url1', categoria: 'Ficción', copiasDisponibles: 10 },
+      { id: 2, titulo: 'Libro 2', descripcion: 'Desc 2', autor: 'Autor 2', isbn: '0987654321', imagenUrl: 'url2', categoria: 'NoFicción', copiasDisponibles: 5 },
     ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
+    apiFetch.mockResolvedValueOnce(mockLibros);
 
-    render(<UpdateProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
+    render(<UpdateLibro toast={mockToast} onClose={mockOnClose} />);
 
     const dropdown = screen.getByRole('button', { name: '' });
     fireEvent.click(dropdown);
     await waitFor(() => {
-      expect(screen.getByText('Producto 1')).toBeInTheDocument();
-      expect(screen.getByText('Producto 2')).toBeInTheDocument();
+      expect(screen.getByText('Libro 1')).toBeInTheDocument();
+      expect(screen.getByText('Libro 2')).toBeInTheDocument();
     });
   });
 
   test('does not render form fields initially', () => {
     apiFetch.mockResolvedValueOnce([]);
-    render(<UpdateProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
-    expect(screen.queryByLabelText('Nombre')).not.toBeInTheDocument();
-  });
-
-  test('handles category selection', async () => {
-    const mockProducts = [
-      { id: 1, nombre: 'Producto 1', descripcion: 'Desc 1', precio: 10, imagenURL: 'url1', categoria: 'Mouse' },
-    ];
-    apiFetch.mockResolvedValueOnce(mockProducts);
-
-    render(<UpdateProducto userId={1} toast={mockToast} onClose={mockOnClose} />);
-
-    const dropdown = screen.getByRole('button', { name: '' });
-    fireEvent.click(dropdown);
-    await waitFor(() => screen.getByText('Producto 1'));
-    fireEvent.click(screen.getByText('Producto 1'));
-
-    await waitFor(() => {
-      const categoriaDropdown = screen.getAllByRole('button', { name: '' })[1];
-      fireEvent.click(categoriaDropdown);
-      expect(screen.getByText('Teclado')).toBeInTheDocument();
-    });
+    render(<UpdateLibro toast={mockToast} onClose={mockOnClose} />);
+    expect(screen.queryByLabelText('Título')).not.toBeInTheDocument();
   });
 });

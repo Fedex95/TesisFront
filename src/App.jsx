@@ -10,6 +10,7 @@ import Pedidos from './components/Pedidos';
 import Producto from './components/Producto';
 import PerfilUsuario from './components/PerfilUsuario';
 import AdminView from './components/Adminview';
+import Verify from './components/Verify';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -30,11 +31,11 @@ function App() {
   const handleLogin = async (data) => {
     setIsAuthenticated(true);
     setUserData(data);
-    setAdmin(!!data.admin);
+    setAdmin(data.rol === 'ADMIN');  
 
     sessionStorage.setItem('isAuthenticated', 'true');
     sessionStorage.setItem('userData', JSON.stringify(data));
-    sessionStorage.setItem('admin', String(!!data.admin));
+    sessionStorage.setItem('admin', String(data.rol === 'ADMIN')); 
     if (data?.token) sessionStorage.setItem('auth_token', data.token);
    
   };
@@ -58,6 +59,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/register" element={<Register />} />
+          <Route path="/verify" element={<Verify />} />
 
         {isAuthenticated ? (
           <>
@@ -66,7 +68,7 @@ function App() {
             <Route path="/perfil" element={<ProtectedRoute><Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><PerfilUsuario userData={userData} /></Layout></ProtectedRoute>} />
             <Route path="/admin" element={isAuthenticated && admin ? <ProtectedRoute requireAdmin><Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><AdminView userData={userData} /></Layout></ProtectedRoute> : <Navigate to="/login" replace />} />
             <Route path="/cart" element={<ProtectedRoute><Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><Cart userData={userData} /></Layout></ProtectedRoute>} />
-            <Route path="/pedidos" element={<ProtectedRoute><Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><Pedidos userId={userData.id} /></Layout></ProtectedRoute>} />
+            <Route path="/pedidos" element={<ProtectedRoute><Layout onLogout={handleLogout} cartItemsCount={cartItems.length} userData={userData}><Pedidos userData={userData} /></Layout></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </>
         ) : (
