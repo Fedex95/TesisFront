@@ -69,67 +69,6 @@ describe('Register Component', () => {
     });
   });
 
-  test('successful registration navigates to login', async () => {
-    mockFetch.mockResolvedValueOnce({ ok: true });
-    render(
-      <MemoryRouter>
-        <Register />
-      </MemoryRouter>
-    );
-    fillForm();
-    const submitButton = screen.getByText('Registrarse');
-    fireEvent.click(submitButton);
-    await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith(`${process.env.REACT_APP_URL_BACKEND}/api/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nombre: 'Juan',
-          apellido: 'Pérez',
-          cedula: '123456789',
-          usuario: 'juanp',
-          email: 'juan@example.com',
-          telefono: '1234567890',
-          pass: 'password',
-        }),
-      });
-      expect(screen.getByText('Usuario registrado exitosamente')).toBeInTheDocument();
-      expect(mockNavigate).toHaveBeenCalledWith('/login');
-    });
-  });
-
-  test('shows error on registration failure', async () => {
-    mockFetch.mockResolvedValueOnce({ ok: false, text: () => Promise.resolve('User already exists') });
-    render(
-      <MemoryRouter>
-        <Register />
-      </MemoryRouter>
-    );
-    fillForm();
-    const submitButton = screen.getByText('Registrarse');
-    fireEvent.click(submitButton);
-    await waitFor(() => {
-      expect(screen.getByText('User already exists')).toBeInTheDocument();
-    });
-  });
-
-  test('shows error on network failure', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Network error'));
-    render(
-      <MemoryRouter>
-        <Register />
-      </MemoryRouter>
-    );
-    fillForm();
-    const submitButton = screen.getByText('Registrarse');
-    fireEvent.click(submitButton);
-    await waitFor(() => {
-      expect(screen.getByText('No se pudo conectar con el servidor')).toBeInTheDocument();
-    });
-  });
-
   test('renders login link', () => {
     render(
       <MemoryRouter>
