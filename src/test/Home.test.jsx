@@ -3,7 +3,6 @@ import { BrowserRouter } from 'react-router-dom';
 import Home from '../components/home/Home';
 
 describe('Home Component', () => {
-
   test('renders list of libros', () => {
     render(
       <BrowserRouter>
