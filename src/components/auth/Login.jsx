@@ -28,7 +28,7 @@ function Login({ onLogin }) {
             });
             return;
         }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
         if (!emailRegex.test(trimmedEmail)) {
             toast.current.show({
                 severity: 'warn',
