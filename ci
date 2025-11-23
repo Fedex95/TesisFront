@@ -1,0 +1,5 @@
+
+> tiendafront@0.1.0 lint
+> eslint "src/**/*.{js,jsx,ts,tsx}" --ext .js,.jsx,.ts,.tsx
+
+¨Desea terminar el trabajo por lotes (S/N)? 
