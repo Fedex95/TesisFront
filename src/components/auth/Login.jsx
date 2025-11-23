@@ -100,7 +100,6 @@ function Login({ onLogin }) {
         }
     };
 
-
     return (
         <div className="login-container flex justify-center items-center p-4 min-h-screen">
             <Toast ref={toast} />
