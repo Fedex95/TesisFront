@@ -17,12 +17,39 @@ jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
 }));
 
+// Mocks para evitar inyección de estilos de PrimeReact que rompen JSDOM
+const mockToastShow = jest.fn();
+jest.mock('primereact/toast', () => {
+  const React = require('react');
+  return {
+    Toast: React.forwardRef((props, ref) => {
+      React.useImperativeHandle(ref, () => ({
+        show: mockToastShow
+      }));
+      return <div data-testid="toast" />;
+    })
+  };
+});
+jest.mock('primereact/inputtext', () => ({
+  InputText: (props) => <input {...props} />
+}));
+jest.mock('primereact/password', () => ({
+  Password: ({ feedback, ...props }) => <input type="password" {...props} />
+}));
+jest.mock('primereact/button', () => ({
+  Button: (props) => <button {...props}>{props.label || props.children}</button>
+}));
+
 const mockOnLogin = jest.fn();
 
 beforeAll(() => {
   // Mock createStylesheet to avoid CSS parsing errors
   const helpers = require('jsdom/lib/jsdom/living/helpers/stylesheets');
-  helpers.createStylesheet = jest.fn(() => ({}));
+  helpers.createStylesheet = jest.fn(() => ({
+    cssRules: [],
+    insertRule: jest.fn(),
+    deleteRule: jest.fn(),
+  }));
 });
 
 describe('Login Component', () => {
@@ -30,6 +57,7 @@ describe('Login Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockToastShow.mockClear();
     require('react-router-dom').useNavigate.mockReturnValue(mockNavigate);
   });
 
@@ -89,7 +117,9 @@ describe('Login Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Inicio de sesión exitoso')).toBeInTheDocument();
+      expect(mockToastShow).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'success', summary: 'Éxito', detail: 'Inicio de sesión exitoso' })
+      );
     });
 
     await waitFor(() => {
@@ -145,7 +175,9 @@ describe('Login Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Network error')).toBeInTheDocument();
+      expect(mockToastShow).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'error', summary: 'Error', detail: 'Network error' })
+      );
     });
   });
 
@@ -165,7 +197,9 @@ describe('Login Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Token de autenticación no recibido')).toBeInTheDocument();
+      expect(mockToastShow).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'error', summary: 'Error', detail: 'Token de autenticación no recibido' })
+      );
     });
   });
 
