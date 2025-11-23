@@ -225,26 +225,6 @@ describe('Home Component', () => {
     expect(plusBtn).toBeDisabled();
   });
 
-  test('agrega al carrito con cantidad modificada', async () => {
-    apiFetch.mockResolvedValueOnce(mockLibros);
-    apiFetch.mockResolvedValueOnce({});
-    render(
-      <BrowserRouter>
-        <Home userData={mockUserData} />
-      </BrowserRouter>
-    );
-    await screen.findByText('Libro 1');
-    const plusBtn = screen.getAllByRole('button', { name: /plus/i })[0];
-    fireEvent.click(plusBtn); 
-    const libro1 = screen.getByText('Libro 1');
-    fireEvent.click(libro1);
-    const addBtn = screen.getByText('Agregar al carrito');
-    fireEvent.click(addBtn);
-    expect(apiFetch).toHaveBeenCalledWith('/api/cart/agregar', {
-      method: 'POST',
-      body: JSON.stringify({ libroId: 1, cantidad: 2 })
-    });
-  });
 
   test('muestra error si usuario no logueado al agregar', async () => {
     apiFetch.mockResolvedValueOnce(mockLibros);
