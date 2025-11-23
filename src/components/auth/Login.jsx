@@ -7,6 +7,7 @@ import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
 import { Link } from 'react-router-dom';
+import isEmail from 'validator/lib/isEmail';
 import '../../styles/Login.css';
 
 function Login({ onLogin }) {
@@ -28,8 +29,7 @@ function Login({ onLogin }) {
             });
             return;
         }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-        if (!emailRegex.test(trimmedEmail)) {
+        if (!isEmail(trimmedEmail)) {
             toast.current.show({
                 severity: 'warn',
                 summary: 'Advertencia',

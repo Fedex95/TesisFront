@@ -5,6 +5,7 @@ import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
 import '../../styles/Register.css';
 import { Password } from 'primereact/password';
+import isEmail from 'validator/lib/isEmail';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -82,8 +83,7 @@ function Register() {
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-    if (!emailRegex.test(email)) {
+    if (!isEmail(email)) {
       toast.current.show({
         severity: 'warn',
         summary: 'Advertencia',

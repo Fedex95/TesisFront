@@ -4,6 +4,7 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
 import { apiFetch } from '../../lib/api';
+import isEmail from 'validator/lib/isEmail';
 import '../../styles/Verify.css';  
 
 export default function Verify() {
@@ -34,8 +35,7 @@ export default function Verify() {
             return;
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-        if (!emailRegex.test(trimmedEmail)) {
+        if (!isEmail(trimmedEmail)) {
             toast.current.show({
                 severity: 'warn',
                 summary: 'Advertencia',
