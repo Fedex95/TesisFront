@@ -88,8 +88,9 @@ describe('Login Component', () => {
     fireEvent.change(passwordInput, { target: { value: 'testpass' } });
     fireEvent.click(submitButton);
 
-    const successMsg = await screen.findByText('Inicio de sesión exitoso');
-    expect(successMsg).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Inicio de sesión exitoso')).toBeInTheDocument();
+    });
 
     await waitFor(() => {
       expect(mockOnLogin).toHaveBeenCalledWith({
@@ -99,6 +100,9 @@ describe('Login Component', () => {
         token: 'mock-token',
         refreshToken: 'mock-refresh',
       });
+    });
+
+    await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith('/home');
     });
   });
@@ -181,8 +185,11 @@ describe('Login Component', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar Sesión' }));
 
     await waitFor(() => {
-      expect(emailInput.value).toBe('');
-      expect(passwordInput.value).toBe('');
+      expect(emailInput).toHaveValue('');
+    });
+
+    await waitFor(() => {
+      expect(passwordInput).toHaveValue('');
     });
   });
 
@@ -244,11 +251,11 @@ describe('Login Component', () => {
         <Login onLogin={mockOnLogin} />
       </MemoryRouter>
     );
-    const registerLink = screen.getByText('Regístrate aquí');
-    const verifyLink = screen.getByText('Verifica aquí');
+    const registerLink = screen.getByRole('link', { name: 'Regístrate aquí' });
+    const verifyLink = screen.getByRole('link', { name: 'Verifica aquí' });
     expect(registerLink).toBeInTheDocument();
     expect(verifyLink).toBeInTheDocument();
-    expect(registerLink.closest('a')).toHaveAttribute('href', '/register');
-    expect(verifyLink.closest('a')).toHaveAttribute('href', '/verify');
+    expect(registerLink).toHaveAttribute('href', '/register');
+    expect(verifyLink).toHaveAttribute('href', '/verify');
   });
 });

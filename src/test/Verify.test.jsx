@@ -107,7 +107,13 @@ describe('Verify Component', () => {
         method: 'POST',
         body: JSON.stringify({ email: 'test@example.com', code: '123456' }),
       });
+    });
+
+    await waitFor(() => {
       expect(screen.getByText('Cuenta verificada exitosamente. Ahora puedes iniciar sesión.')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith('/login');
     });
   });
@@ -152,6 +158,9 @@ describe('Verify Component', () => {
         method: 'POST',
         body: JSON.stringify({ email: 'test@example.com' }),
       });
+    });
+
+    await waitFor(() => {
       expect(screen.getByText('Revisa tu correo.')).toBeInTheDocument();
     });
   });
