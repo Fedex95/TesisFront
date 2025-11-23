@@ -1,0 +1,104 @@
+.register {
+    display: flex;
+    font-family: Arial, sans-serif;
+}
+
+.image-side {
+    flex: 0.7;
+    background: url('https://as2.ftcdn.net/v2/jpg/06/07/18/65/1000_F_607186528_YJ2hru4UCL2DV7iB5sYj0nXR50SVy44o.jpg') no-repeat center center;
+    background-size: cover;
+    position: relative;
+}
+
+.image-side .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(20, 20, 20, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+}
+
+.register-w-full {
+    width: 100%;
+    font-size: 14px;
+    flex-direction: column;
+}
+
+.w-full-pass{
+    width: 100%;
+    font-size: 14px;
+    flex-direction: column;
+}
+
+.form-side {
+    flex: 1;
+    padding: 1rem;
+    color: black;
+    background: linear-gradient(90deg, #4441e0 0%, #6d30bd 100%);
+    justify-content: center;
+    display: grid;
+    max-width: 1000px;
+    overflow: hidden;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: #f3e3e3;
+    justify-content: center;
+    text-align: center;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: rgb(245, 239, 239);
+}
+
+.register-button {
+    width: 50%;
+    background: #78ff66;
+    border: none;
+    color: rgb(0, 0, 0);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 10px;
+    margin-top: 1rem; 
+    display: block; 
+    margin-left: auto; 
+    margin-right: auto; 
+}
+
+.login-prompt{
+    width: 50%;
+    border: none;
+    color: rgb(255, 255, 255);
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 1rem; 
+    margin-left: 27%; 
+    margin-right: 30%;
+}
+.login-link{
+    color: #f3e3e3;
+}
+
+.form-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.form-group > div {
+    flex: 1;
+    min-width: 150px;
+    margin: 0.5rem;
+}

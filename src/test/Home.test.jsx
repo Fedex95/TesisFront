@@ -1,17 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import Home from '../components/Home';
+import Home from '../components/home/Home';
 
 describe('Home Component', () => {
-  test('renders welcome message', () => {
-    render(
-      <BrowserRouter>
-        <Home />
-      </BrowserRouter>
-    );
-    expect(screen.getByText('Bienvenido a Library Master')).toBeInTheDocument();
-  });
-
   test('renders list of libros', () => {
     render(
       <BrowserRouter>

@@ -4,6 +4,7 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 
 export default function Layout({ children }) {
+
     const cartItemsCount = 0;
 
     return (
