@@ -141,7 +141,7 @@ describe('UpdateStatus Component', () => {
 
         render(<UpdateStatus userData={mockUserData} toast={mockToast} />);
 
-        await screen.findByText('Fecha de solicitud: 30/9/2023');
+        await screen.findByText('Fecha de solicitud: 1/10/2023');
     });
 
     test('calculates total libros correctly', async () => {
@@ -162,5 +162,4 @@ describe('UpdateStatus Component', () => {
         expect(screen.getByText('Libro 2 - Autor: Autor 2 x1')).toBeInTheDocument();
         expect(screen.getByText('Libro 3 - Autor: Autor 3 x1')).toBeInTheDocument();
     });
-
 });

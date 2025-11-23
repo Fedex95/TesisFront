@@ -22,7 +22,7 @@ jest.mock('../components/home/Layout', () => ({ children, onLogout }) => (
 ));
 
 jest.mock('../components/home/Home', () => () => <div>Library Master</div>);
-jest.mock('../components/home/AdminView', () => () => <div>Agregar</div>);
+jest.mock('../components/home/Adminview', () => () => <div>Agregar</div>);
 jest.mock('../components/auth/Register', () => () => <div>Register</div>);
 jest.mock('../components/cart/Cart', () => () => <div>Cart</div>);
 jest.mock('../components/cart/Pedidos', () => () => <div>Pedidos</div>);
