@@ -1,9 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { Card } from 'primereact/card';
-import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import { apiFetch } from '../../lib/api';
+import BookDialog from '../shared/BookDialog'; 
 
 export default function Producto({ userData }) {  
     const [libros, setLibros] = useState([]);  
@@ -218,120 +217,15 @@ export default function Producto({ userData }) {
                 </div>
             ))}
 
-            <Dialog
-                header="Detalles del libro"  
+            <BookDialog
                 visible={dialogVisible}
-                style={{
-                    width: '30vw',
-                    padding: '15px',
-                    borderRadius: '10px',
-                    backgroundColor: '#f5f5f5',
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                }}
                 onHide={() => setDialogVisible(false)}
-                modal
-                draggable={false}
-                className="p-d-flex p-ai-center"
-                baseZIndex={1000}
-            >
-                <div
-                    style={{
-                        background: '#fff',
-                        borderRadius: '10px',
-                        padding: '20px',
-                        marginTop: '10px',
-                        boxShadow: '0px 4px 15px rgba(0,0,0,0.1)',
-                        textAlign: 'center',
-                    }}
-                >
-                    <img
-                        src={selectedLibro?.imagenUrl}  
-                        alt={selectedLibro?.titulo}  
-                        className="menu-image"
-                        style={{
-                            width: '100%',
-                            maxHeight: '200px',
-                            objectFit: 'cover',
-                            borderRadius: '10px',
-                            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
-                            marginBottom: '15px',
-                        }}
-                    />
-                    <h3
-                        style={{
-                            fontSize: '20px',
-                            fontWeight: 'bold',
-                            color: '#333',
-                            marginBottom: '8px',
-                        }}
-                    >
-                        {selectedLibro?.titulo}  
-                    </h3>
-                    <p
-                        style={{
-                            fontSize: '14px',
-                            color: '#555',
-                            marginBottom: '12px',
-                        }}
-                    >
-                        {selectedLibro?.descripcion}
-                    </p>
-                    <p
-                        style={{
-                            fontSize: '14px',
-                            color: '#888',
-                            marginBottom: '10px',
-                        }}
-                    >
-                        Autor: {selectedLibro?.autor}  
-                    </p>
-                    <p
-                        style={{
-                            fontSize: '14px',
-                            color: '#888',
-                            fontStyle: 'italic',
-                            marginBottom: '20px',
-                        }}
-                    >
-                        {categories.find(c => c.value === selectedLibro?.categoria)?.label || selectedLibro?.categoria}
-                    </p>
-
-                    {selectedLibro && (
-                        <div>
-                            <Button
-                                icon="pi pi-minus"
-                                onClick={() =>
-                                    handleQuantityChange(
-                                        selectedLibro.id,  
-                                        quantities[selectedLibro.id] - 1
-                                    )
-                                }
-                                style={{ marginRight: '10px' }}
-                            />
-                            <span>{quantities[selectedLibro.id]}</span> 
-                            <Button
-                                icon="pi pi-plus"
-                                onClick={() =>
-                                    handleQuantityChange(
-                                        selectedLibro.id,  
-                                        quantities[selectedLibro.id] + 1
-                                    )
-                                }
-                                style={{ marginLeft: '10px' }}
-                            />
-                            <div style={{ marginTop: '20px' }}>
-                                <Button
-                                    label="Agregar al carrito"
-                                    icon="pi pi-shopping-cart"
-                                    onClick={() => addToCart(selectedLibro.id)} 
-                                    style={{ width: '100%' }}
-                                    className="p-button-success"
-                                />
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </Dialog>
+                selectedLibro={selectedLibro}
+                quantities={quantities}
+                handleQuantityChange={handleQuantityChange}
+                addToCart={addToCart}
+                categorias={categories}
+            />
         </div>
     );
 }
