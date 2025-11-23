@@ -34,7 +34,7 @@ jest.mock('primereact/inputtext', () => ({
   InputText: (props) => <input {...props} />
 }));
 jest.mock('primereact/password', () => ({
-  Password: (props) => <input type="password" {...props} />
+  Password: ({ feedback, ...props }) => <input type="password" {...props} />
 }));
 jest.mock('primereact/button', () => ({
   Button: (props) => <button {...props}>{props.label || props.children}</button>
