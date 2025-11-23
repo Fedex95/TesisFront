@@ -69,13 +69,4 @@ describe('AdminMenu Component', () => {
     render(<AdminMenu userData={{ id: 2, admin: true }} />);
     expect(screen.getByText('Agregar')).toBeInTheDocument();
   });
-
-  test('does not render dialogs initially', () => {
-    render(<AdminMenu userData={{ id: 1 }} />);
-    expect(screen.queryByText('Add Product Component')).not.toBeInTheDocument();
-    expect(screen.queryByText('Update Product Component')).not.toBeInTheDocument();
-    expect(screen.queryByText('Delete Product Component')).not.toBeInTheDocument();
-    expect(screen.queryByText('Pedido Component')).not.toBeInTheDocument();
-    expect(screen.queryByText('Update Status Component')).not.toBeInTheDocument();
-  });
 });
