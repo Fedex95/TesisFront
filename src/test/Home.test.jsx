@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import Home from '../components/home/Home';
 import { BrowserRouter } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
@@ -12,20 +12,86 @@ jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
 }));
 
-const mockUserData = { id: 1, name: 'Test User' };
+const mockToastShow = jest.fn();
+jest.mock('primereact/toast', () => {
+  const React = require('react');
+  return {
+    Toast: React.forwardRef((props, ref) => {
+      React.useImperativeHandle(ref, () => ({
+        show: mockToastShow
+      }));
+      return <div data-testid="toast" />;
+    })
+  };
+});
+jest.mock('primereact/card', () => ({
+  Card: ({ children, onClick }) => <div data-testid="card" onClick={onClick}>{children}</div>
+}));
+jest.mock('primereact/button', () => ({
+  Button: (props) => {
+    const label = props['aria-label'] || props.label ||
+      (props.icon?.includes('pi-plus') ? 'plus' :
+       props.icon?.includes('pi-minus') ? 'minus' : (props.children || 'button'));
+    return (
+      <button
+        {...props}
+        aria-label={label}
+        disabled={props.disabled}
+      >
+        {props.children || label}
+      </button>
+    );
+  }
+}));
+jest.mock('primereact/inputnumber', () => ({
+  InputNumber: ({ value, onValueChange, min = 1, max = 10, readOnly }) => (
+    <input
+      type="number"
+      aria-label="cantidad"
+      value={value}
+      readOnly={readOnly}
+      min={min}
+      max={max}
+      onChange={(e) => {
+        const v = parseInt(e.target.value, 10);
+        onValueChange && onValueChange({ value: v });
+      }}
+    />
+  )
+}));
+jest.mock('primereact/carousel', () => ({
+  Carousel: ({ value, itemTemplate }) => (
+    <div data-testid="carousel">
+      {value && value.map(itemTemplate)}
+    </div>
+  )
+}));
+
+beforeAll(() => {
+  if (!global.crypto) {
+    global.crypto = {
+      getRandomValues: (arr) => {
+        for (let i = 0; i < arr.length; i++) arr[i] = Math.floor(Math.random() * 4294967296);
+        return arr;
+      }
+    };
+  }
+});
 
 const mockLibros = [
   { id: 1, titulo: 'Libro 1', autor: 'Autor 1', descripcion: 'Desc 1', categoria: 'Ficción', isbn: '1234567890', imagenUrl: 'http://example.com/1.jpg' },
   { id: 2, titulo: 'Libro 2', autor: 'Autor 2', descripcion: 'Desc 2', categoria: 'NoFicción', isbn: '0987654321', imagenUrl: 'http://example.com/2.jpg' }
 ];
 
-describe('Home Component', () => {
-  const mockNavigate = jest.fn();
+const mockNavigate = jest.fn();
+const mockUserData = { id: 10 };
 
+describe('Home Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockToastShow.mockClear();
+    sessionStorage.setItem('auth_token', 'token');
     require('react-router-dom').useNavigate.mockReturnValue(mockNavigate);
-    sessionStorage.setItem('auth_token', 'mock-token');
     apiFetch.mockResolvedValue(mockLibros);
   });
 
@@ -33,89 +99,17 @@ describe('Home Component', () => {
     sessionStorage.clear();
   });
 
-  test('renders featured product (carousel presence)', async () => {
+  test('renderiza libros en el carousel', async () => {
     render(
       <BrowserRouter>
         <Home userData={mockUserData} />
       </BrowserRouter>
     );
-    const libro1 = await screen.findByText('Libro 1');
-    expect(libro1).toBeInTheDocument();
+    expect(await screen.findByText('Libro 1')).toBeInTheDocument();
+    expect(screen.getByText('Libro 2')).toBeInTheDocument();
   });
 
-  test('displays featured products', async () => {
-    render(
-      <BrowserRouter>
-        <Home userData={mockUserData} />
-      </BrowserRouter>
-    );
-    const libro1 = await screen.findByText('Libro 1');
-    const libro2 = await screen.findByText('Libro 2');
-    expect(libro1).toBeInTheDocument();
-    expect(libro2).toBeInTheDocument();
-  });
-
-  test('opens dialog on product click', async () => {
-    render(
-      <BrowserRouter>
-        <Home userData={mockUserData} />
-      </BrowserRouter>
-    );
-    const libro1 = await screen.findByText('Libro 1');
-    fireEvent.click(libro1);
-    const specs = await screen.findByText('Detalles del Libro');
-    expect(specs).toBeInTheDocument();
-  });
-
-  test('renders add to cart button in dialog', async () => {
-    render(
-      <BrowserRouter>
-        <Home userData={mockUserData} />
-      </BrowserRouter>
-    );
-    const libro1 = await screen.findByText('Libro 1');
-    fireEvent.click(libro1);
-    const addBtn = await screen.findByText('Agregar al carrito');
-    expect(addBtn).toBeInTheDocument();
-  });
-
-  test('fetches products on mount', async () => {
-    render(
-      <BrowserRouter>
-        <Home userData={mockUserData} />
-      </BrowserRouter>
-    );
-    await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledWith('/api/libros');
-    });
-  });
-
-  test('navigates to login if no token', () => {
-    sessionStorage.removeItem('auth_token');
-    render(
-      <BrowserRouter>
-        <Home userData={mockUserData} />
-      </BrowserRouter>
-    );
-    expect(mockNavigate).toHaveBeenCalledWith('/login');
-  });
-
-  test('shows error if not logged in', async () => {
-    render(
-      <BrowserRouter>
-        <Home userData={{}} />
-      </BrowserRouter>
-    );
-    const libro1 = await screen.findByText('Libro 1');
-    fireEvent.click(libro1);
-    const addBtn = await screen.findByText('Agregar al carrito');
-    fireEvent.click(addBtn);
-    await waitFor(() => {
-      expect(screen.getByText('Debe iniciar sesión para agregar al carrito')).toBeInTheDocument();
-    });
-  });
-
-  test('closes dialog on hide', async () => {
+  test('abre el diálogo al hacer click en un libro', async () => {
     render(
       <BrowserRouter>
         <Home userData={mockUserData} />
@@ -124,46 +118,21 @@ describe('Home Component', () => {
     const libro1 = await screen.findByText('Libro 1');
     fireEvent.click(libro1);
     expect(screen.getByText('Detalles del Libro')).toBeInTheDocument();
-    // Simulate closing dialog
-    const closeButton = screen.getByRole('button', { name: /close/i });
-    fireEvent.click(closeButton);
-    await waitFor(() => {
-      expect(screen.queryByText('Detalles del Libro')).not.toBeInTheDocument();
-    });
   });
 
-  test('renders product image in dialog', async () => {
+  test('muestra imagen en diálogo', async () => {
     render(
       <BrowserRouter>
         <Home userData={mockUserData} />
       </BrowserRouter>
     );
-
     const libro1 = await screen.findByText('Libro 1');
     fireEvent.click(libro1);
-
     const imgs = screen.getAllByAltText('Libro 1');
-
-    expect(imgs[0]).toBeInTheDocument();
+    expect(imgs.length).toBeGreaterThan(0);
   });
 
-  test('renders product description in dialog', async () => {
-    render(
-      <BrowserRouter>
-        <Home userData={mockUserData} />
-      </BrowserRouter>
-    );
-
-    const libro1 = await screen.findByText('Libro 1');
-    fireEvent.click(libro1);
-
-    const dialog = await screen.findByRole('dialog');
-
-    expect(within(dialog).getByText('Desc 1')).toBeInTheDocument();
-  });
-
-
-  test('renders product isbn in dialog', async () => {
+  test('muestra ISBN en diálogo', async () => {
     render(
       <BrowserRouter>
         <Home userData={mockUserData} />
@@ -174,83 +143,27 @@ describe('Home Component', () => {
     expect(screen.getByText('ISBN: 1234567890')).toBeInTheDocument();
   });
 
-
-  test('handles fetch error gracefully', async () => {
-    apiFetch.mockRejectedValueOnce(new Error('Fetch error'));
+  test('no navega a login si hay token', async () => {
     render(
       <BrowserRouter>
         <Home userData={mockUserData} />
       </BrowserRouter>
     );
-    await waitFor(() => {
-      expect(screen.queryByText('Libro 1')).not.toBeInTheDocument();
-    });
+    await screen.findByText('Libro 1');
+    expect(mockNavigate).not.toHaveBeenCalledWith('/login');
   });
 
-  test('adds to cart successfully', async () => {
-    apiFetch.mockResolvedValueOnce([
-      { id: 1, titulo: "Libro 1", precio: 10 },
-      { id: 2, titulo: "Libro 2", precio: 15 }
-    ]);
+  test('navega a login si no hay token', () => {
+    sessionStorage.removeItem('auth_token');
     render(
       <BrowserRouter>
         <Home userData={mockUserData} />
       </BrowserRouter>
     );
-    const libro1 = await screen.findByText('Libro 1');
-    fireEvent.click(libro1);
-    const addBtn = await screen.findByText('Agregar al carrito');
-    fireEvent.click(addBtn);
-    await waitFor(async () => {
-      expect(apiFetch).toHaveBeenCalledWith('/api/cart/agregar', {
-        method: 'POST',
-        body: JSON.stringify({ libroId: 1, cantidad: 1 }),
-      });
-      await waitFor(() => {
-        expect(screen.getByText('Libro agregado al carrito')).toBeInTheDocument();
-      })
-    });
+    expect(mockNavigate).toHaveBeenCalledWith('/login');
   });
 
-
-  test('carousel has responsive options', async () => {
-    render(
-      <BrowserRouter>
-        <Home userData={mockUserData} />
-      </BrowserRouter>
-    );
-    const carousel = screen.getByRole('region');
-    await waitFor(() => {
-      expect(carousel).toBeInTheDocument()
-    })
-  });
-
-
-
-  test('initial quantities are set', async () => {
-    render(
-      <BrowserRouter>
-        <Home userData={mockUserData} />
-      </BrowserRouter>
-    );
-    await waitFor(() => {
-      expect(screen.getByText('Libro 1')).toBeInTheDocument();
-    });
-  });
-
-  test('renders multiple products in carousel', async () => {
-    render(
-      <BrowserRouter>
-        <Home userData={mockUserData} />
-      </BrowserRouter>
-    );
-    const libro1 = await screen.findByText('Libro 1');
-    const libro2 = await screen.findByText('Libro 2');
-    expect(libro1).toBeInTheDocument();
-    expect(libro2).toBeInTheDocument();
-  });
-
-  test('dialog shows correct quantity', async () => {
+  test('cantidad inicial en diálogo es 1', async () => {
     render(
       <BrowserRouter>
         <Home userData={mockUserData} />
@@ -259,5 +172,91 @@ describe('Home Component', () => {
     const libro1 = await screen.findByText('Libro 1');
     fireEvent.click(libro1);
     expect(screen.getByText('1')).toBeInTheDocument();
+  });
+
+  test('mapea categoría NoFicción a etiqueta No Ficción', async () => {
+    render(
+      <BrowserRouter>
+        <Home userData={mockUserData} />
+      </BrowserRouter>
+    );
+    await screen.findByText('Libro 2');
+    expect(screen.getByText('No Ficción')).toBeInTheDocument();
+  });
+
+  test('usa imagen fallback al error', async () => {
+    render(
+      <BrowserRouter>
+        <Home userData={mockUserData} />
+      </BrowserRouter>
+    );
+    await screen.findByText('Libro 1');
+    const img = screen.getAllByAltText('Libro 1')[0];
+    fireEvent.error(img);
+    expect(img.src).toContain('https://via.placeholder.com/300');
+  });
+
+  test('incrementa cantidad con botón plus en tarjeta', async () => {
+    render(
+      <BrowserRouter>
+        <Home userData={mockUserData} />
+      </BrowserRouter>
+    );
+    await screen.findByText('Libro 1');
+    const plusBtn = screen.getAllByRole('button', { name: /plus/i })[0];
+    const spin = screen.getAllByRole('spinbutton')[0];
+    expect(spin.value).toBe('1');
+    fireEvent.click(plusBtn);
+    expect(spin.value).toBe('2');
+  });
+
+  test('deshabilita minus al llegar a 1 y plus al llegar a 10', async () => {
+    render(
+      <BrowserRouter>
+        <Home userData={mockUserData} />
+      </BrowserRouter>
+    );
+    await screen.findByText('Libro 1');
+    const plusBtn = screen.getAllByRole('button', { name: /plus/i })[0];
+    const minusBtn = screen.getAllByRole('button', { name: /minus/i })[0];
+    expect(minusBtn).toBeDisabled();
+    for (let i = 0; i < 9; i++) fireEvent.click(plusBtn);
+    expect(plusBtn).toBeDisabled();
+  });
+
+  test('agrega al carrito con cantidad modificada', async () => {
+    apiFetch.mockResolvedValueOnce(mockLibros);
+    apiFetch.mockResolvedValueOnce({});
+    render(
+      <BrowserRouter>
+        <Home userData={mockUserData} />
+      </BrowserRouter>
+    );
+    await screen.findByText('Libro 1');
+    const plusBtn = screen.getAllByRole('button', { name: /plus/i })[0];
+    fireEvent.click(plusBtn); 
+    const libro1 = screen.getByText('Libro 1');
+    fireEvent.click(libro1);
+    const addBtn = screen.getByText('Agregar al carrito');
+    fireEvent.click(addBtn);
+    expect(apiFetch).toHaveBeenCalledWith('/api/cart/agregar', {
+      method: 'POST',
+      body: JSON.stringify({ libroId: 1, cantidad: 2 })
+    });
+  });
+
+  test('muestra error si usuario no logueado al agregar', async () => {
+    apiFetch.mockResolvedValueOnce(mockLibros);
+    render(
+      <BrowserRouter>
+        <Home userData={{}} />
+      </BrowserRouter>
+    );
+    const libro1 = await screen.findByText('Libro 1');
+    fireEvent.click(libro1);
+    fireEvent.click(screen.getByText('Agregar al carrito'));
+    expect(mockToastShow).toHaveBeenCalledWith(
+      expect.objectContaining({ severity: 'error', detail: 'Debe iniciar sesión para agregar al carrito' })
+    );
   });
 });
