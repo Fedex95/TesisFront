@@ -79,7 +79,7 @@ describe('Cart Component', () => {
 
   test('renders cart title', () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
@@ -88,7 +88,7 @@ describe('Cart Component', () => {
 
   test('renders catalog button', () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
@@ -97,7 +97,7 @@ describe('Cart Component', () => {
 
   test('renders empty cart message', () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
@@ -106,7 +106,7 @@ describe('Cart Component', () => {
 
   test('renders catalog button as button element', () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
@@ -115,7 +115,7 @@ describe('Cart Component', () => {
 
   test('renders cart container', () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
@@ -125,7 +125,7 @@ describe('Cart Component', () => {
   test('fetches cart items on mount when userData.id exists', async () => {
     apiFetch.mockResolvedValueOnce(mockCartData);
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
@@ -137,7 +137,7 @@ describe('Cart Component', () => {
   test('displays cart items when fetched', async () => {
     apiFetch.mockResolvedValueOnce(mockCartData);
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
@@ -154,7 +154,7 @@ describe('Cart Component', () => {
     apiFetch.mockResolvedValueOnce();
     apiFetch.mockResolvedValueOnce(mockCartData);
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
@@ -174,7 +174,7 @@ describe('Cart Component', () => {
     apiFetch.mockResolvedValueOnce();
     apiFetch.mockResolvedValueOnce({ items: [] });
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
@@ -193,7 +193,7 @@ describe('Cart Component', () => {
   test('shows error on fetch failure', async () => {
     apiFetch.mockRejectedValueOnce(new Error('Fetch error'));
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
@@ -208,7 +208,7 @@ describe('Cart Component', () => {
     apiFetch.mockResolvedValueOnce(mockCartData);
     apiFetch.mockRejectedValueOnce(new Error('Remove error'));
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
@@ -226,7 +226,7 @@ describe('Cart Component', () => {
     apiFetch.mockResolvedValueOnce(mockCartData);
     apiFetch.mockRejectedValueOnce(new Error('Loan error'));
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
@@ -242,7 +242,7 @@ describe('Cart Component', () => {
 
   test('navigates to home on catalog button click', () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
@@ -253,7 +253,7 @@ describe('Cart Component', () => {
 
   test('does not fetch cart if no userData.id', () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <Cart userData={{}} />
       </BrowserRouter>
     );
