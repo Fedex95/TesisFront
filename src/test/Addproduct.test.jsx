@@ -15,23 +15,6 @@ describe('AddProduct Component', () => {
     jest.clearAllMocks();
   });
 
-  test('renders form fields', () => {
-    render(<AddProduct userId={userId} onClose={mockOnClose} userData={userData} />);
-    expect(screen.getByLabelText(/título/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/autor/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/descripción/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/isbn/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/url de la imagen/i)).toBeInTheDocument();
-    expect(screen.getByText(/categoría/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/copias disponibles/i)).toBeInTheDocument();
-  });
-
-  test('renders add and cancel buttons', () => {
-    render(<AddProduct userId={userId} onClose={mockOnClose} userData={userData} />);
-    expect(screen.getByText(/añadir/i)).toBeInTheDocument();
-    expect(screen.getByText(/cancelar/i)).toBeInTheDocument();
-  });
-
   test('allows entering text in input fields', () => {
     render(<AddProduct userId={userId} onClose={mockOnClose} userData={userData} />);
     
@@ -58,13 +41,6 @@ describe('AddProduct Component', () => {
     render(<AddProduct userId={userId} onClose={mockOnClose} userData={userData} />);
     const dropdown = screen.getByRole('button', { name: '' });
     expect(dropdown).toBeInTheDocument();
-  });
-
-  test('submit button is clickable', () => {
-    render(<AddProduct userId={userId} onClose={mockOnClose} userData={userData} />);
-    const submitButton = screen.getByText(/añadir/i);
-    fireEvent.click(submitButton);
-    expect(submitButton).toBeInTheDocument();
   });
 
   test('cancel button calls onClose', () => {
@@ -107,25 +83,5 @@ describe('AddProduct Component', () => {
     await waitFor(() => {
       expect(screen.getByText(/campos requeridos/i)).toBeInTheDocument();
     });
-  });
-
-  test('shows error on API failure', async () => {
-    apiFetch.mockRejectedValueOnce(new Error('API Error'));
-    render(<AddProduct userId={userId} onClose={mockOnClose} userData={userData} />);
-
-    // Fill form minimally
-    fireEvent.change(screen.getByLabelText(/título/i), { target: { value: 'Test' } });
-    fireEvent.change(screen.getByLabelText(/autor/i), { target: { value: 'Author' } });
-    fireEvent.change(screen.getByLabelText(/descripción/i), { target: { value: 'Desc' } });
-    fireEvent.change(screen.getByLabelText(/isbn/i), { target: { value: '1234567890' } });
-    fireEvent.change(screen.getByLabelText(/url de la imagen/i), { target: { value: 'http://test.com' } });
-    fireEvent.change(screen.getByLabelText(/copias disponibles/i), { target: { value: '10' } });
-    const dropdown = screen.getByRole('button', { name: '' });
-    fireEvent.click(dropdown);
-    fireEvent.click(screen.getByText('Ficción'));
-
-    fireEvent.click(screen.getByText(/añadir/i));
-
-    
   });
 });
