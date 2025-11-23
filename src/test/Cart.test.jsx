@@ -79,8 +79,8 @@ describe('Cart Component', () => {
 
   test('renders cart title', () => {
     render(
-      <BrowserRouter future={{ v7_startTransition: true }}>
-        <Cart userData={mockUserData} />
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Cart userData={{}} />
       </BrowserRouter>
     );
     expect(screen.getByText('Carrito de Préstamos')).toBeInTheDocument();
@@ -88,8 +88,8 @@ describe('Cart Component', () => {
 
   test('renders catalog button', () => {
     render(
-      <BrowserRouter future={{ v7_startTransition: true }}>
-        <Cart userData={mockUserData} />
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Cart userData={{}} />
       </BrowserRouter>
     );
     expect(screen.getByText('Catálogo')).toBeInTheDocument();
@@ -97,8 +97,8 @@ describe('Cart Component', () => {
 
   test('renders empty cart message', () => {
     render(
-      <BrowserRouter future={{ v7_startTransition: true }}>
-        <Cart userData={mockUserData} />
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Cart userData={{}} />
       </BrowserRouter>
     );
     expect(screen.getByText('Tu carrito está vacío')).toBeInTheDocument();
@@ -106,8 +106,8 @@ describe('Cart Component', () => {
 
   test('renders catalog button as button element', () => {
     render(
-      <BrowserRouter future={{ v7_startTransition: true }}>
-        <Cart userData={mockUserData} />
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Cart userData={{}} />
       </BrowserRouter>
     );
     expect(screen.getByRole('button', { name: /catálogo/i })).toBeInTheDocument();
@@ -115,29 +115,27 @@ describe('Cart Component', () => {
 
   test('renders cart container', () => {
     render(
-      <BrowserRouter future={{ v7_startTransition: true }}>
-        <Cart userData={mockUserData} />
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Cart userData={{}} />
       </BrowserRouter>
     );
-    expect(screen.getByText('Carrito de Préstamos')).toBeInTheDocument(); 
+    expect(screen.getByText('Carrito de Préstamos')).toBeInTheDocument();
   });
 
   test('fetches cart items on mount when userData.id exists', async () => {
     apiFetch.mockResolvedValueOnce(mockCartData);
     render(
-      <BrowserRouter future={{ v7_startTransition: true }}>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
-    await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledWith('/api/cart/get');
-    });
+    await waitFor(() => expect(apiFetch).toHaveBeenCalledWith('/api/cart/get'));
   });
 
   test('displays cart items when fetched', async () => {
     apiFetch.mockResolvedValueOnce(mockCartData);
     render(
-      <BrowserRouter future={{ v7_startTransition: true }}>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Cart userData={mockUserData} />
       </BrowserRouter>
     );
