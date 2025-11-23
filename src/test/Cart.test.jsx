@@ -149,6 +149,104 @@ describe('Cart Component', () => {
     expect(screen.getByText('Cantidad: 1')).toBeInTheDocument();
   });
 
+  test('displays cart items with correct images', async () => {
+    apiFetch.mockResolvedValueOnce(mockCartData);
+    render(
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Cart userData={mockUserData} />
+      </BrowserRouter>
+    );
+    await screen.findByText('Libro 1');
+    const imgs = screen.getAllByAltText('Libro 1');
+    expect(imgs[0]).toHaveAttribute('src', 'http://example.com/image.jpg');
+  });
+
+  test('image onError hides the image', async () => {
+    apiFetch.mockResolvedValueOnce(mockCartData);
+    render(
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Cart userData={mockUserData} />
+      </BrowserRouter>
+    );
+    await screen.findByText('Libro 1');
+    const img = screen.getAllByAltText('Libro 1')[0];
+    fireEvent.error(img);
+    expect(img.style.display).toBe('none');
+  });
+
+  test('remove button has correct aria-label', async () => {
+    apiFetch.mockResolvedValueOnce(mockCartData);
+    render(
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Cart userData={mockUserData} />
+      </BrowserRouter>
+    );
+    await screen.findByText('Libro 1');
+    const removeButtons = screen.getAllByRole('button', { name: /eliminar/i });
+    expect(removeButtons[0]).toHaveAttribute('aria-label', 'Eliminar');
+  });
+
+  test('loan button is disabled when cart is empty', () => {
+    render(
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Cart userData={mockUserData} />
+      </BrowserRouter>
+    );
+    const loanButton = screen.queryByText('Solicitar Préstamo');
+    expect(loanButton).toBeNull(); 
+  });
+
+  test('loan button is enabled when cart has items', async () => {
+    apiFetch.mockResolvedValueOnce(mockCartData);
+    render(
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Cart userData={mockUserData} />
+      </BrowserRouter>
+    );
+    await screen.findByText('Solicitar Préstamo');
+    const loanButton = screen.getByText('Solicitar Préstamo');
+    expect(loanButton).not.toBeDisabled();
+  });
+
+  test('after successful loan, cart is cleared', async () => {
+    apiFetch.mockResolvedValueOnce(mockCartData);
+    apiFetch.mockResolvedValueOnce();
+    render(
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Cart userData={mockUserData} />
+      </BrowserRouter>
+    );
+    await screen.findByText('Solicitar Préstamo');
+    const loanButton = screen.getByText('Solicitar Préstamo');
+    fireEvent.click(loanButton);
+    await waitFor(() => {
+      expect(screen.getByText('Tu carrito está vacío')).toBeInTheDocument();
+    });
+  });
+
+  test('summary shows correct number of books', async () => {
+    apiFetch.mockResolvedValueOnce(mockCartData);
+    render(
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Cart userData={mockUserData} />
+      </BrowserRouter>
+    );
+    await screen.findByText('Solicitar Préstamo');
+    expect(screen.getByText('Libros solicitados: 2')).toBeInTheDocument();
+  });
+
+  test('cart items are mapped correctly', async () => {
+    apiFetch.mockResolvedValueOnce(mockCartData);
+    render(
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Cart userData={mockUserData} />
+      </BrowserRouter>
+    );
+    await screen.findByText('Libro 1');
+    expect(screen.getByText('Libro 2')).toBeInTheDocument();
+    expect(screen.getAllByRole('img')).toHaveLength(2);
+  });
+
   test('removes item from cart', async () => {
     apiFetch.mockResolvedValueOnce(mockCartData);
     apiFetch.mockResolvedValueOnce();
