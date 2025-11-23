@@ -78,6 +78,7 @@ beforeAll(() => {
   }
 });
 
+
 const mockLibros = [
   { id: 1, titulo: 'Libro 1', autor: 'Autor 1', descripcion: 'Desc 1', categoria: 'Ficción', isbn: '1234567890', imagenUrl: 'http://example.com/1.jpg' },
   { id: 2, titulo: 'Libro 2', autor: 'Autor 2', descripcion: 'Desc 2', categoria: 'NoFicción', isbn: '0987654321', imagenUrl: 'http://example.com/2.jpg' }
