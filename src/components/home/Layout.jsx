@@ -1,9 +1,12 @@
+import { useNavigate } from 'react-router-dom';
+import { useRef, useState, useEffect } from 'react';
 import Navbar from './Navbar'; 
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 
 export default function Layout({ children }) {
+
     const cartItemsCount = 0;
 
     return (
