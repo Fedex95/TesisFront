@@ -1,0 +1,148 @@
+.settings-container {
+    padding: 2rem 4rem;
+    background: var(--background-light);
+    min-height: calc(100vh - 80px);
+    width: 100%;
+}
+
+.settings-title {
+    text-align: center;
+    color: var(--primary-color);
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.settings-card {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.settings-form {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-field label {
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.field-with-button {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.field-with-button .p-inputtext,
+.field-with-button .p-password {
+    flex: 1;
+}
+
+.field-with-button .p-button {
+    align-self: flex-end;
+}
+
+.password-section {
+    background: #FFF8DC;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin: 1rem 0;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.password-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-family: 'Playfair Display', serif;
+}
+
+/* PrimeReact component customization */
+.p-inputtext {
+    padding: 0.75rem !important;
+}
+
+.p-password {
+    width: 100%;
+}
+
+.p-button {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.p-button:hover {
+    background: var(--secondary-color) !important;
+    border-color: var(--secondary-color) !important;
+}
+
+.p-button:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+    .settings-container {
+        padding: 1rem;
+    }
+
+    .settings-card {
+        padding: 1rem;
+    }
+
+    .settings-title {
+        font-size: 2rem;
+    }
+
+    .field-with-button {
+        flex-direction: column;
+    }
+
+    .field-with-button .p-button {
+        width: 100%;
+    }
+}
+
+/* Estilos para los mensajes Toast */
+.p-toast {
+    opacity: 1 !important;
+}
+
+.p-toast-message-success {
+    background-color: #DFF2BF !important;
+    border-color: #4CAF50 !important;
+}
+
+.p-toast-message-success .p-toast-message-icon,
+.p-toast-message-success .p-toast-summary {
+    color: #4CAF50 !important;
+}
+
+.p-toast-message-error {
+    background-color: #FFBABA !important;
+    border-color: #D8000C !important;
+}
+
+/* Estilos para los botones */
+.p-button.p-button-success {
+    background: var(--green-500) !important;
+    border-color: var(--green-500) !important;
+}
+
+.p-button.p-button-success:hover {
+    background: var(--green-600) !important;
+    border-color: var(--green-600) !important;
+}
+
+.p-button.p-button-success:focus {
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--green-400) !important;
+}
